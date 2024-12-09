@@ -1,0 +1,36 @@
+services:
+  database:
+    container_name: stepforward-db
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - PGUSER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - database_volume:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  prisma-studio:
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio:latest
+    environment:
+      POSTGRES_URL: ${CONTAINER_DATABASE_URL}
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "5555:5555"
+    command: ["--port", "5555"]
+
+networks:
+  database_network:
+  
+volumes:
+  database_volume:

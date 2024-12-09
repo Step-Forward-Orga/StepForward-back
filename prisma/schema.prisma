@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Schema for a User
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  roles      Role[]   @default([USER])
+
+  trainingNote TrainingNote[]
+  workoutPlans WorkoutPlan[]
+}
+
+// Schema for written notes in a workout
+model TrainingNote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  note      String
+  createdAt DateTime @default(now())
+
+  workoutPlan   WorkoutPlan?
+  user      User @relation(fields: [userId], references: [id])
+}
+
+// Schema for a workout plan 
+model WorkoutPlan {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String @default("")
+  createdAt   DateTime @default(now())
+  trainingNoteId Int? @unique
+
+  trainingNote  TrainingNote? @relation(fields: [trainingNoteId], references: [id])
+  user        User @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+}
+
+// Schema for a Exercise
+model Exercise {
+  id            Int      @id @default(autoincrement())
+  planId        Int
+  exerciseName  String
+  exerciceId    Int
+  sets          Int
+  reps          Int
+  weight        Int
+  restTime      String // 
+  createdAt     DateTime @default(now())
+
+  workoutPlan   WorkoutPlan @relation(fields: [planId], references: [id])
+}
+
+// Schema for a Revoked Token
+model RevokedToken {
+  id        Int      @id @default(autoincrement())
+  jti       String   @unique
+  createdAt DateTime @default(now())
+}
+
+// Enumeration for the different roles of a user
+enum Role {
+  USER
+  ADMIN
+}
