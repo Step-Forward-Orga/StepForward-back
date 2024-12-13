@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateWorkoutPlanDto } from './dto/create-workout-plan.dto';
 import { UpdateWorkoutPlanDto } from './dto/update-workout-plan.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateExerciseDto } from 'src/exercise/dto/create-exercise.dto';
 
 @Injectable()
 export class WorkoutPlanService {
@@ -22,12 +23,19 @@ export class WorkoutPlanService {
   }
 
   async findAll() {
-    return await this.prisma.workoutPlan.findMany();
+    return await this.prisma.workoutPlan.findMany({
+      include: {
+        exercises: true,
+      },
+    });
   }
 
   async findOne(id: number) {
     return await this.prisma.workoutPlan.findUniqueOrThrow({
       where: { id },
+      include: {
+        exercises: true,
+      },
     })
   }
 
