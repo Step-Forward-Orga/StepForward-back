@@ -6,20 +6,20 @@ import { ApiTags,
     ApiParam,
     ApiCookieAuth,
 } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/sign-up.dto';
-import { handleErrors } from 'src/utils/handle-errors';
 import { JwtPayload } from './contracts/JwtPayload.interface';
-
-import { Request, Response } from 'express';
 import { SignInDto } from './dto/sign-in-dto';
-import { UserEntity } from 'src/user/entities/user.entity';
-import { ApiResponseBody } from 'src/responses/ApiResponse';
-import { InvalidCredentials } from 'src/errors/InvalidCredentials';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { RevokedToken } from '@prisma/client';
-import { User } from 'src/decorators/user.decorator';
 import { AuthGuard } from './authentication.guard';
+
+import { handleErrors } from '../utils/handle-errors';
+import { UserEntity } from '../user/entities/user.entity';
+import { ApiResponseBody } from '../responses/ApiResponse';
+import { InvalidCredentials } from '../errors/InvalidCredentials';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../decorators/user.decorator';
 
 @ApiTags('Auth')
 @Controller('authentication')
