@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+
+import { handleErrors } from '../utils/handle-errors';
+import { AuthGuard } from '../authentication/authentication.guard';
+import { User } from '../decorators/user.decorator';
+import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
+
 import { WorkoutPlanService } from './workout-plan.service';
 import { CreateWorkoutPlanDto } from './dto/create-workout-plan.dto';
 import { UpdateWorkoutPlanDto } from './dto/update-workout-plan.dto';
-import { handleErrors } from 'src/utils/handle-errors';
-import { AuthGuard } from 'src/authentication/authentication.guard';
-import { User } from 'src/decorators/user.decorator';
-import { JwtPayload } from 'src/authentication/contracts/JwtPayload.interface';
 
 // ? user can create, delete, get, delete his workout plans
 

@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RevokedToken } from '@prisma/client';
-
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcrypt';
+
+import { PrismaService } from '../prisma/prisma.service';
+import { InvalidCredentials } from '../errors/InvalidCredentials';
+import { InvalidTokenType } from '../errors/InvalidTokenType';
 
 import { SignUpDto } from './dto/sign-up.dto';
 import { JwtType } from './enums/JwtType.enum';
 import { SignInDto } from './dto/sign-in-dto';
 import { JwtPayload } from './contracts/JwtPayload.interface';
-import { PrismaService } from '../prisma/prisma.service';
-import { InvalidCredentials } from '../errors/InvalidCredentials';
-import { InvalidTokenType } from '../errors/InvalidTokenType';
 
 @Injectable()
 export class AuthenticationService {

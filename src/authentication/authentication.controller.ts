@@ -8,18 +8,18 @@ import { ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 
-import { AuthenticationService } from './authentication.service';
-import { SignUpDto } from './dto/sign-up.dto';
-import { JwtPayload } from './contracts/JwtPayload.interface';
-import { SignInDto } from './dto/sign-in-dto';
-import { AuthGuard } from './authentication.guard';
-
 import { handleErrors } from '../utils/handle-errors';
 import { UserEntity } from '../user/entities/user.entity';
 import { ApiResponseBody } from '../responses/ApiResponse';
 import { InvalidCredentials } from '../errors/InvalidCredentials';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '../decorators/user.decorator';
+
+import { AuthenticationService } from './authentication.service';
+import { SignUpDto } from './dto/sign-up.dto';
+import { JwtPayload } from './contracts/JwtPayload.interface';
+import { SignInDto } from './dto/sign-in-dto';
+import { AuthGuard } from './authentication.guard';
 
 @ApiTags('Auth')
 @Controller('authentication')

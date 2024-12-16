@@ -1,19 +1,20 @@
 import { Controller, UseGuards, Patch, Body } from '@nestjs/common';
-import { UserService } from './user.service';
-
 import { ApiCookieAuth,
   ApiTags,
   ApiBody,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/authentication/authentication.guard';
-import { User } from 'src/decorators/user.decorator';
-import { JwtPayload } from 'src/authentication/contracts/JwtPayload.interface';
+
+import { AuthGuard } from '../authentication/authentication.guard';
+import { User } from '../decorators/user.decorator';
+import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
+import { handleErrors } from '../utils/handle-errors';
+import { ApiResponseBody } from '../responses/ApiResponse';
+
+import { UserService } from './user.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { handleErrors } from 'src/utils/handle-errors';
 import { UpdateEmailDto } from './dto/update-email.dto';
-import { ApiResponseBody } from 'src/responses/ApiResponse';
 
 @ApiTags('User')
 @Controller('user')

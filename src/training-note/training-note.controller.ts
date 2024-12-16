@@ -1,15 +1,17 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { User } from '../decorators/user.decorator';
+import { handleErrors } from '../utils/handle-errors';
+import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
+import { AuthGuard } from '../authentication/authentication.guard';
+import { ApiResponseBody } from '../responses/ApiResponse';
+
 import { TrainingNoteService } from './training-note.service';
 import { CreateTrainingNoteDto } from './dto/create-training-note.dto';
 import { UpdateTrainingNoteDto } from './dto/update-training-note.dto';
-import { User } from 'src/decorators/user.decorator';
-
-import { handleErrors } from 'src/utils/handle-errors';
-import { JwtPayload } from 'src/authentication/contracts/JwtPayload.interface';
-import { ApiBody, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/authentication/authentication.guard';
-import { ApiResponseBody } from 'src/responses/ApiResponse';
 import { TrainingNoteEntity } from './entities/training-note.entity';
+
 
 @Controller('training-note')
 @UseGuards(AuthGuard)

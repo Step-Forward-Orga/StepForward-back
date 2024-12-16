@@ -1,5 +1,6 @@
-import { UserEntity } from "src/user/entities/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
+
+import { UserEntity } from "../../user/entities/user.entity";
 
 export class TrainingNoteEntity {
     @ApiProperty({ example: 1})

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTrainingNoteDto } from './dto/create-training-note.dto';
-import { UpdateTrainingNoteDto } from './dto/update-training-note.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { connect } from 'http2';
+
+import { PrismaService } from '../prisma/prisma.service';
+
+import { UpdateTrainingNoteDto } from './dto/update-training-note.dto';
 
 @Injectable()
 export class TrainingNoteService {

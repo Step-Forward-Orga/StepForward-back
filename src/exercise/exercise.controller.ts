@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+
+import { AuthGuard } from '../authentication/authentication.guard';
+import { handleErrors } from '../utils/handle-errors';
+
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
-import { AuthGuard } from 'src/authentication/authentication.guard';
-import { handleErrors } from 'src/utils/handle-errors';
 
 @Controller('Exercise')
 @UseGuards(AuthGuard)
