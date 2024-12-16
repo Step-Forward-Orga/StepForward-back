@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-
 import * as uuid from 'uuid';
 
-import { AuthenticationService } from './authentication.service';
 import { PrismaService } from '../prisma/prisma.service';
+
+import { AuthenticationService } from './authentication.service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
