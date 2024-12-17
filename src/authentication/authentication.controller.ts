@@ -140,20 +140,31 @@ export class AuthenticationController {
         @User() user: JwtPayload,
         @Res({ passthrough: true }) res: Response,
     ) {
-        try {
-            res.clearCookie('jwt');
-            res.clearCookie('refreshToken', {
-                path: '/authentication/refresh-token',
-            });
+        const results = [];
 
-            return [
-                await this.authService.revokeToken(user.jti),
-                    user.refreshJti
-                    ? await this.authService.revokeToken(user.refreshJti)
-                    : null,
-                ];
-        } catch (err: unknown) {
-            handleErrors(err);
+        try {
+            // Attempt to revoke the main access token (jti)
+            const revokedJti = await this.authService.revokeToken(user.jti);
+            results.push(revokedJti);
+        } catch (err) {
+            console.error('Failed to revoke access token (jti):', err.message);
+            results.push(null); // Push null to indicate failure
         }
+
+        try {
+            // Attempt to revoke the refresh token (refreshJti) if it exists
+            const revokedRefreshJti = user.refreshJti
+                ? await this.authService.revokeToken(user.refreshJti)
+                : null;
+            results.push(revokedRefreshJti);
+        } catch (err) {
+            results.push(null);
+        }
+
+        // Always clear the cookies, regardless of errors
+        res.clearCookie('jwt');
+        res.clearCookie('refreshToken', { path: '/authentication/refresh-token' });
+
+        return results; // Return the results array
     }
 }
