@@ -1,0 +1,40 @@
+name: Run Tests
+
+on:
+  pull_request: # Run on pull requests to prevent merging if tests fail
+    branches:
+      - main # Specify the branch you want to protect
+  push: # Optionally, run on direct pushes (e.g., for CI)
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Specify the Node.js version
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Run tests
+      - name: Run tests
+        run: npm run test
+
+      # Step 5: Upload test results (optional)
+      - name: Upload test results (optional)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results
