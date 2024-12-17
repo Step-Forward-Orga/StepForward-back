@@ -57,11 +57,11 @@ model Exercise {
   id            Int      @id @default(autoincrement())
   planId        Int
   exerciseName  String
-  exerciceId    Int
+  exerciseId    String
   sets          Int
   reps          Int
   weight        Int
-  restTime      String // 
+  restTime      String
   createdAt     DateTime @default(now())
 
   workoutPlan   WorkoutPlan @relation(fields: [planId], references: [id])

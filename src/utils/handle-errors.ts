@@ -42,8 +42,9 @@ export function handleErrors(err: unknown, message? : string) {
 
     if (err instanceof HttpException) throw err;
 
+    if (err instanceof ConflictException) throw new ConflictException(message ?? err.message);
+
     handlePrismaErrors(err);
 
-    console.error(err);
     throw new InternalServerErrorException(message ?? '');
 }

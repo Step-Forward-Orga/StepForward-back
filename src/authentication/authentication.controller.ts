@@ -6,19 +6,19 @@ import { ApiTags,
     ApiParam,
     ApiCookieAuth,
 } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+
+import { handleErrors } from '../utils/handle-errors';
+import { UserEntity } from '../user/entities/user.entity';
+import { ApiResponseBody } from '../responses/ApiResponse';
+import { InvalidCredentials } from '../errors/InvalidCredentials';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../decorators/user.decorator';
+
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/sign-up.dto';
-import { handleErrors } from 'src/utils/handle-errors';
 import { JwtPayload } from './contracts/JwtPayload.interface';
-
-import { Request, Response } from 'express';
 import { SignInDto } from './dto/sign-in-dto';
-import { UserEntity } from 'src/user/entities/user.entity';
-import { ApiResponseBody } from 'src/responses/ApiResponse';
-import { InvalidCredentials } from 'src/errors/InvalidCredentials';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { RevokedToken } from '@prisma/client';
-import { User } from 'src/decorators/user.decorator';
 import { AuthGuard } from './authentication.guard';
 
 @ApiTags('Auth')
@@ -140,20 +140,31 @@ export class AuthenticationController {
         @User() user: JwtPayload,
         @Res({ passthrough: true }) res: Response,
     ) {
-        try {
-            res.clearCookie('jwt');
-            res.clearCookie('refreshToken', {
-                path: '/authentication/refresh-token',
-            });
+        const results = [];
 
-            return [
-                await this.authService.revokeToken(user.jti),
-                    user.refreshJti
-                    ? await this.authService.revokeToken(user.refreshJti)
-                    : null,
-                ];
-        } catch (err: unknown) {
-            handleErrors(err);
+        try {
+            // Attempt to revoke the main access token (jti)
+            const revokedJti = await this.authService.revokeToken(user.jti);
+            results.push(revokedJti);
+        } catch (err) {
+            console.error('Failed to revoke access token (jti):', err.message);
+            results.push(null); // Push null to indicate failure
         }
+
+        try {
+            // Attempt to revoke the refresh token (refreshJti) if it exists
+            const revokedRefreshJti = user.refreshJti
+                ? await this.authService.revokeToken(user.refreshJti)
+                : null;
+            results.push(revokedRefreshJti);
+        } catch (err) {
+            results.push(null);
+        }
+
+        // Always clear the cookies, regardless of errors
+        res.clearCookie('jwt');
+        res.clearCookie('refreshToken', { path: '/authentication/refresh-token' });
+
+        return results; // Return the results array
     }
 }
