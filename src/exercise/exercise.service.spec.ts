@@ -370,4 +370,12 @@ describe('ExerciseService - remove', () => {
       where: { id: 999 },
     });
   });
+
+  it('should fail intentionally to test the workflow', async () => {
+    // Arrange
+    const unexpectedResult = 'This will fail';
+  
+    // Act & Assert
+    expect('This test will fail').toEqual(unexpectedResult);
+  });
 });
