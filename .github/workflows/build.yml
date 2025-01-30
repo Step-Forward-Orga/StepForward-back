@@ -1,0 +1,30 @@
+name: Build Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.18.0  # Adjust this to match your project's Node.js version
+          cache: 'npm'  # Change to 'yarn' or 'pnpm' if using a different package manager
+
+      - name: Install dependencies
+        run: npm install  # Use 'yarn install' or 'pnpm install' if needed
+
+      - name: Build the project
+        run: npm run build  # Replace with 'yarn build' or 'pnpm build' if applicable
