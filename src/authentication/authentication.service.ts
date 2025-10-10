@@ -56,7 +56,6 @@ export class AuthenticationService {
         const user = await this.prisma.user.create({ data: newUser });
 
         const tokens = await this.generateTokens(user.id);
-
         return { user, tokens }
     }
 

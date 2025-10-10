@@ -16,9 +16,14 @@ export class ExerciseService {
         exerciseName: createExerciseDto.exerciseName,
         exerciseId: createExerciseDto.exerciseId,
         sets: createExerciseDto.sets,
-        reps: createExerciseDto.reps,
-        weight: createExerciseDto.weight,
+        aimed_reps: createExerciseDto.aimed_reps,
+        aimed_weight: createExerciseDto.aimed_weight,
         restTime: createExerciseDto.restTime,
+        completed: createExerciseDto.completed ?? false,
+        completedWeight: createExerciseDto.completed_weight ?? null,
+        completedReps: createExerciseDto.completed_reps ?? null,
+        completedSets: createExerciseDto.completed_sets ?? null,
+        // Assuming planId is a foreign key to a Workout or similar entity
         planId: createExerciseDto.planId,
       }
     })
