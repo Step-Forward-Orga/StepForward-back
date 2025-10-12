@@ -34,8 +34,7 @@ export class NotesController {
       try {
           return this.NotesService.create(
             user.sub,
-            CreateNotesDto.title,
-            CreateNotesDto.note,
+            CreateNotesDto
           );
       } catch (err: unknown) {
         handleErrors(err);

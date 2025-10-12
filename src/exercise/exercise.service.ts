@@ -51,7 +51,16 @@ export class ExerciseService {
   }
 
   async findAll() {
-    return await this.prisma.exercise.findMany();
+    return await this.prisma.exercise.findMany(
+      {
+        include: {
+          plannedSets: true,
+          completedSets: true,
+          workout: true,
+          note: true,
+        },
+      }
+    );
   }
 
   async findOne(id: number) {

@@ -31,12 +31,16 @@ model User {
 model Notes {
   id        Int      @id @default(autoincrement())
   userId    Int
-  title     String
-  note      String
+  title     String?
+  note      String?
   createdAt DateTime @default(now())
 
+  workoutId Int?
   workout   Workout?
+  workoutCycleId Int?
   workoutCycle WorkoutCycle?
+  exerciseId Int?
+  exercise  Exercise?
   user      User @relation(fields: [userId], references: [id])
 }
 
@@ -64,7 +68,7 @@ model WorkoutCycle {
   createdAt   DateTime @default(now())
   noteId Int? @unique
 
-  note Notes? @relation(fields: [noteId], references: [id])
+  note        Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
   workouts    Workout[]
 }
@@ -88,16 +92,16 @@ model Exercise {
   id            Int      @id @default(autoincrement())
   exerciseName  String
   //! exerciseId    String In the future were the exercise dataset will be used
-  plannedSetsId Int?
   plannedSets   Set[] @relation("PlannedSets")
   restTime      String?
 
-  completedSetsId Int?
   completedSets Set[] @relation("CompletedSets")
   completed     Boolean @default(false)
   completedAt   DateTime?
   createdAt     DateTime @default(now())
 
+  noteId        Int? @unique
+  note          Notes? @relation(fields: [noteId], references: [id])
   workoutId     Int?
   workout       Workout? @relation(fields: [workoutId], references: [id])
 }

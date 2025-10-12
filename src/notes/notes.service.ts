@@ -4,6 +4,7 @@ import { connect } from 'http2';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { UpdateNotesDto } from './dto/update-notes.dto';
+import { CreateNotesDto } from './dto/create-notes.dto';
 
 @Injectable()
 export class NotesService {
@@ -13,14 +14,16 @@ export class NotesService {
 
   async create(
     authorId: number,
-    title: string,
-    note: string,
+    createNotesDto: CreateNotesDto
   ) {
     return await this.prisma.notes.create({
       data: {
-        title,
-        note,
+        title: createNotesDto.title,
+        note: createNotesDto.note,
         user: { connect: { id: authorId } },
+        workout: createNotesDto.workoutId ? { connect: { id: createNotesDto.workoutId } } : undefined,
+        workoutCycle: createNotesDto.workoutCycleId ? { connect: { id: createNotesDto.workoutCycleId } } : undefined,
+        exercise: createNotesDto.exerciseId ? { connect: { id: createNotesDto.exerciseId } } : undefined,
       },
     })
   }

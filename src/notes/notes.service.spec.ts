@@ -44,7 +44,7 @@ describe('NotesService - create', () => {
     mockPrisma.notes.create.mockResolvedValueOnce(mockCreatedNote);
 
     // Act
-    const result = await service.create(authorId, title, note);
+    const result = await service.create(authorId, mockCreatedNote);
 
     // Assert
     expect(prisma.notes.create).toHaveBeenCalledWith({
@@ -64,12 +64,19 @@ describe('NotesService - create', () => {
     const title = 'My Failed Note';
     const note = 'This will fail.';
 
+    const mockCreatedNote = {
+      id: 1,
+      title,
+      note,
+      userId: authorId,
+    };
+
     const mockError = new Error('Database connection failed');
 
     mockPrisma.notes.create.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.create(authorId, title, note)).rejects.toThrow(
+    await expect(service.create(authorId, mockCreatedNote)).rejects.toThrow(
       'Database connection failed',
     );
 
