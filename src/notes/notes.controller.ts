@@ -13,7 +13,7 @@ import { UpdateNotesDto } from './dto/update-notes.dto';
 import { NotesEntity } from './entities/notes.entity';
 
 
-@Controller('note')
+@Controller('notes')
 @UseGuards(AuthGuard)
 @ApiTags('Notes')
 export class NotesController {
