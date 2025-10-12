@@ -2,16 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import { WorkoutPlanService } from './workout-plan.service';
-import { CreateWorkoutPlanDto } from './dto/create-workout-plan.dto';
+import { WorkoutService } from './workout.service';
+import { CreateWorkoutDto } from './dto/create-workout.dto';
 
-describe('WorkoutPlanService - create', () => {
-  let service: WorkoutPlanService;
+describe('WorkoutService - create', () => {
+  let service: WorkoutService;
   let prisma: PrismaService;
 
   // Mock PrismaService
   const mockPrisma = {
-    workoutPlan: {
+    workout: {
       create: jest.fn(),
     },
   };
@@ -19,81 +19,81 @@ describe('WorkoutPlanService - create', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WorkoutPlanService,
+        WorkoutService,
         { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<WorkoutPlanService>(WorkoutPlanService);
+    service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should successfully create a workout plan', async () => {
     // Arrange
     const userId = 1;
-    const createWorkoutPlanDto: CreateWorkoutPlanDto = {
+    const CreateWorkoutDto: CreateWorkoutDto = {
       title: 'My First Plan',
       description: 'A great workout plan',
     };
 
-    const mockWorkoutPlan = {
+    const mockWorkout = {
       id: 1,
       userId: 1,
       title: 'My First Plan',
       description: 'A great workout plan',
     };
 
-    mockPrisma.workoutPlan.create.mockResolvedValueOnce(mockWorkoutPlan);
+    mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout);
 
     // Act
-    const result = await service.create(userId, createWorkoutPlanDto);
+    const result = await service.create(userId, CreateWorkoutDto);
 
     // Assert
-    expect(prisma.workoutPlan.create).toHaveBeenCalledWith({
+    expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         userId,
-        title: createWorkoutPlanDto.title,
-        description: createWorkoutPlanDto.description,
+        title: CreateWorkoutDto.title,
+        description: CreateWorkoutDto.description,
       },
     });
 
-    expect(result).toEqual(mockWorkoutPlan);
+    expect(result).toEqual(mockWorkout);
   });
 
   it('should propagate an error if creation fails', async () => {
     // Arrange
     const userId = 1;
-    const createWorkoutPlanDto: CreateWorkoutPlanDto = {
+    const CreateWorkoutDto: CreateWorkoutDto = {
       title: 'Fail Plan',
       description: 'This will fail',
     };
 
     const mockError = new Error('Database error');
 
-    mockPrisma.workoutPlan.create.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.create.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.create(userId, createWorkoutPlanDto)).rejects.toThrow(
+    await expect(service.create(userId, CreateWorkoutDto)).rejects.toThrow(
       'Database error',
     );
 
-    expect(prisma.workoutPlan.create).toHaveBeenCalledWith({
+    expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         userId,
-        title: createWorkoutPlanDto.title,
-        description: createWorkoutPlanDto.description,
+        title: CreateWorkoutDto.title,
+        description: CreateWorkoutDto.description,
       },
     });
   });
 });
 
-describe('WorkoutPlanService - findAll', () => {
-  let service: WorkoutPlanService;
+describe('WorkoutService - findAll', () => {
+  let service: WorkoutService;
   let prisma: PrismaService;
 
   // Mock PrismaService
   const mockPrisma = {
-    workoutPlan: {
+    workout: {
       findMany: jest.fn(),
     },
   };
@@ -101,18 +101,18 @@ describe('WorkoutPlanService - findAll', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WorkoutPlanService,
+        WorkoutService,
         { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<WorkoutPlanService>(WorkoutPlanService);
+    service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should return all workout plans with their exercises', async () => {
     // Arrange
-    const mockWorkoutPlans = [
+    const mockWorkouts = [
       {
         id: 1,
         title: 'Plan 1',
@@ -127,41 +127,41 @@ describe('WorkoutPlanService - findAll', () => {
       },
     ];
 
-    mockPrisma.workoutPlan.findMany.mockResolvedValueOnce(mockWorkoutPlans);
+    mockPrisma.workout.findMany.mockResolvedValueOnce(mockWorkouts);
 
     // Act
     const result = await service.findAll();
 
     // Assert
-    expect(prisma.workoutPlan.findMany).toHaveBeenCalledWith({
+    expect(prisma.workout.findMany).toHaveBeenCalledWith({
       include: { exercises: true },
     });
 
-    expect(result).toEqual(mockWorkoutPlans);
+    expect(result).toEqual(mockWorkouts);
   });
 
   it('should propagate an error if findMany fails', async () => {
     // Arrange
     const mockError = new Error('Database error');
 
-    mockPrisma.workoutPlan.findMany.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.findMany.mockRejectedValueOnce(mockError);
 
     // Act & Assert
     await expect(service.findAll()).rejects.toThrow('Database error');
 
-    expect(prisma.workoutPlan.findMany).toHaveBeenCalledWith({
+    expect(prisma.workout.findMany).toHaveBeenCalledWith({
       include: { exercises: true },
     });
   });
 });
 
-describe('WorkoutPlanService - findOne', () => {
-  let service: WorkoutPlanService;
+describe('WorkoutService - findOne', () => {
+  let service: WorkoutService;
   let prisma: PrismaService;
 
   // Mock PrismaService
   const mockPrisma = {
-    workoutPlan: {
+    workout: {
       findUniqueOrThrow: jest.fn(),
     },
   };
@@ -169,19 +169,19 @@ describe('WorkoutPlanService - findOne', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WorkoutPlanService,
+        WorkoutService,
         { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<WorkoutPlanService>(WorkoutPlanService);
+    service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should return a workout plan with exercises when found', async () => {
     // Arrange
     const id = 1;
-    const mockWorkoutPlan = {
+    const mockWorkout = {
       id: 1,
       title: 'Plan 1',
       description: 'A great workout plan',
@@ -191,17 +191,17 @@ describe('WorkoutPlanService - findOne', () => {
       ],
     };
 
-    mockPrisma.workoutPlan.findUniqueOrThrow.mockResolvedValueOnce(mockWorkoutPlan);
+    mockPrisma.workout.findUniqueOrThrow.mockResolvedValueOnce(mockWorkout);
 
     // Act
     const result = await service.findOne(id);
 
     // Assert
-    expect(prisma.workoutPlan.findUniqueOrThrow).toHaveBeenCalledWith({
+    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
       include: { exercises: true },
     });
-    expect(result).toEqual(mockWorkoutPlan);
+    expect(result).toEqual(mockWorkout);
   });
 
   it('should throw an error if the workout plan is not found', async () => {
@@ -209,12 +209,12 @@ describe('WorkoutPlanService - findOne', () => {
     const id = 999;
     const mockError = new Error('Workout plan not found');
 
-    mockPrisma.workoutPlan.findUniqueOrThrow.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.findUniqueOrThrow.mockRejectedValueOnce(mockError);
 
     // Act & Assert
     await expect(service.findOne(id)).rejects.toThrow('Workout plan not found');
 
-    expect(prisma.workoutPlan.findUniqueOrThrow).toHaveBeenCalledWith({
+    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
       include: { exercises: true },
     });
@@ -225,25 +225,25 @@ describe('WorkoutPlanService - findOne', () => {
     const id = 1;
     const mockError = new Error('Database error');
 
-    mockPrisma.workoutPlan.findUniqueOrThrow.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.findUniqueOrThrow.mockRejectedValueOnce(mockError);
 
     // Act & Assert
     await expect(service.findOne(id)).rejects.toThrow('Database error');
 
-    expect(prisma.workoutPlan.findUniqueOrThrow).toHaveBeenCalledWith({
+    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
       include: { exercises: true },
     });
   });
 });
 
-describe('WorkoutPlanService - update', () => {
-  let service: WorkoutPlanService;
+describe('WorkoutService - update', () => {
+  let service: WorkoutService;
   let prisma: PrismaService;
 
   // Mock PrismaService
   const mockPrisma = {
-    workoutPlan: {
+    workout: {
       update: jest.fn(),
     },
   };
@@ -251,96 +251,96 @@ describe('WorkoutPlanService - update', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WorkoutPlanService,
+        WorkoutService,
         { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<WorkoutPlanService>(WorkoutPlanService);
+    service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should successfully update a workout plan', async () => {
     // Arrange
     const id = 1;
-    const updateWorkoutPlanDto = {
+    const updateWorkoutDto = {
       title: 'Updated Plan',
       description: 'Updated Description',
     };
 
-    const updatedWorkoutPlan = {
+    const updatedWorkout = {
       id: 1,
       title: 'Updated Plan',
       description: 'Updated Description',
       userId: 1,
     };
 
-    mockPrisma.workoutPlan.update.mockResolvedValueOnce(updatedWorkoutPlan);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
 
     // Act
-    const result = await service.update(id, updateWorkoutPlanDto);
+    const result = await service.update(id, updateWorkoutDto);
 
     // Assert
-    expect(prisma.workoutPlan.update).toHaveBeenCalledWith({
+    expect(prisma.workout.update).toHaveBeenCalledWith({
       where: { id },
-      data: updateWorkoutPlanDto,
+      data: updateWorkoutDto,
     });
 
-    expect(result).toEqual(updatedWorkoutPlan);
+    expect(result).toEqual(updatedWorkout);
   });
 
   it('should throw an error if the workout plan to update is not found', async () => {
     // Arrange
     const id = 999;
-    const updateWorkoutPlanDto = {
+    const updateWorkoutDto = {
       title: 'Non-existent Plan',
       description: 'Non-existent Description',
     };
 
     const mockError = new Error('Workout plan not found');
-    mockPrisma.workoutPlan.update.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(id, updateWorkoutPlanDto)).rejects.toThrow(
+    await expect(service.update(id, updateWorkoutDto)).rejects.toThrow(
       'Workout plan not found',
     );
 
-    expect(prisma.workoutPlan.update).toHaveBeenCalledWith({
+    expect(prisma.workout.update).toHaveBeenCalledWith({
       where: { id },
-      data: updateWorkoutPlanDto,
+      data: updateWorkoutDto,
     });
   });
 
   it('should propagate a generic error if update fails', async () => {
     // Arrange
     const id = 1;
-    const updateWorkoutPlanDto = {
+    const updateWorkoutDto = {
       title: 'Error Plan',
       description: 'This will cause an error',
     };
 
     const mockError = new Error('Database error');
-    mockPrisma.workoutPlan.update.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(id, updateWorkoutPlanDto)).rejects.toThrow(
+    await expect(service.update(id, updateWorkoutDto)).rejects.toThrow(
       'Database error',
     );
 
-    expect(prisma.workoutPlan.update).toHaveBeenCalledWith({
+    expect(prisma.workout.update).toHaveBeenCalledWith({
       where: { id },
-      data: updateWorkoutPlanDto,
+      data: updateWorkoutDto,
     });
   });
 });
 
-describe('WorkoutPlanService - remove', () => {
-  let service: WorkoutPlanService;
+describe('WorkoutService - remove', () => {
+  let service: WorkoutService;
   let prisma: PrismaService;
 
   // Mock PrismaService
   const mockPrisma = {
-    workoutPlan: {
+    workout: {
       delete: jest.fn(),
     },
   };
@@ -348,35 +348,35 @@ describe('WorkoutPlanService - remove', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        WorkoutPlanService,
+        WorkoutService,
         { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<WorkoutPlanService>(WorkoutPlanService);
+    service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should successfully delete a workout plan', async () => {
     // Arrange
     const id = 1;
-    const mockDeletedWorkoutPlan = {
+    const mockDeletedWorkout = {
       id: 1,
       title: 'Plan 1',
       description: 'A deleted workout plan',
       userId: 1,
     };
 
-    mockPrisma.workoutPlan.delete.mockResolvedValueOnce(mockDeletedWorkoutPlan);
+    mockPrisma.workout.delete.mockResolvedValueOnce(mockDeletedWorkout);
 
     // Act
     const result = await service.remove(id);
 
     // Assert
-    expect(prisma.workoutPlan.delete).toHaveBeenCalledWith({
+    expect(prisma.workout.delete).toHaveBeenCalledWith({
       where: { id },
     });
-    expect(result).toEqual(mockDeletedWorkoutPlan);
+    expect(result).toEqual(mockDeletedWorkout);
   });
 
   it('should throw an error if the workout plan does not exist', async () => {
@@ -384,12 +384,12 @@ describe('WorkoutPlanService - remove', () => {
     const id = 999;
     const mockError = new Error('Workout plan not found');
 
-    mockPrisma.workoutPlan.delete.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.delete.mockRejectedValueOnce(mockError);
 
     // Act & Assert
     await expect(service.remove(id)).rejects.toThrow('Workout plan not found');
 
-    expect(prisma.workoutPlan.delete).toHaveBeenCalledWith({
+    expect(prisma.workout.delete).toHaveBeenCalledWith({
       where: { id },
     });
   });
@@ -399,12 +399,12 @@ describe('WorkoutPlanService - remove', () => {
     const id = 1;
     const mockError = new Error('Database error');
 
-    mockPrisma.workoutPlan.delete.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.delete.mockRejectedValueOnce(mockError);
 
     // Act & Assert
     await expect(service.remove(id)).rejects.toThrow('Database error');
 
-    expect(prisma.workoutPlan.delete).toHaveBeenCalledWith({
+    expect(prisma.workout.delete).toHaveBeenCalledWith({
       where: { id },
     });
   });

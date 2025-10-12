@@ -22,49 +22,88 @@ model User {
   createdAt DateTime @default(now())
   roles      Role[]   @default([USER])
 
-  trainingNote TrainingNote[]
-  workoutPlans WorkoutPlan[]
+  Notes Notes[]
+  workout Workout[]
+  workoutCycle WorkoutCycle[]
 }
 
-// Schema for written notes in a workout
-model TrainingNote {
+// Schema for written notes in a workout or workout cycle
+model Notes {
   id        Int      @id @default(autoincrement())
   userId    Int
-  title     String
-  note      String
+  title     String?
+  note      String?
   createdAt DateTime @default(now())
 
-  workoutPlan   WorkoutPlan?
+  workoutId Int?
+  workout   Workout?
+  workoutCycleId Int?
+  workoutCycle WorkoutCycle?
+  exerciseId Int?
+  exercise  Exercise?
   user      User @relation(fields: [userId], references: [id])
 }
 
 // Schema for a workout plan 
-model WorkoutPlan {
+model Workout {
   id          Int      @id @default(autoincrement())
   userId      Int
   title       String
   description String @default("")
   createdAt   DateTime @default(now())
-  trainingNoteId Int? @unique
+  noteId Int? @unique
+  workoutCycleId Int?
 
-  trainingNote  TrainingNote? @relation(fields: [trainingNoteId], references: [id])
+  note  Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
   exercises   Exercise[]
+  workoutCycle WorkoutCycle? @relation(fields: [workoutCycleId], references: [id])
+}
+
+model WorkoutCycle {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String @default("")
+  createdAt   DateTime @default(now())
+  noteId Int? @unique
+
+  note        Notes? @relation(fields: [noteId], references: [id])
+  user        User @relation(fields: [userId], references: [id])
+  workouts    Workout[]
+}
+
+model Set {
+  id         Int      @id @default(autoincrement())
+  reps       Int
+  weight     Float
+  order      Int // Order of the set in the exercise
+  createdAt  DateTime @default(now())
+  type       SetType // PLANNED or COMPLETED
+
+  plannedForId Int?
+  plannedFor   Exercise? @relation("PlannedSets", fields: [plannedForId], references: [id])
+  completedForId Int?
+  completedFor Exercise? @relation("CompletedSets", fields: [completedForId], references: [id])
 }
 
 // Schema for a Exercise
 model Exercise {
   id            Int      @id @default(autoincrement())
-  planId        Int
   exerciseName  String
-  exerciseId    String
-  sets          Int
-  reps          Int
-  weight        Int
-  restTime      String
+  //! exerciseId    String In the future were the exercise dataset will be used
+  plannedSets   Set[] @relation("PlannedSets")
+  restTime      String?
+
+  completedSets Set[] @relation("CompletedSets")
+  completed     Boolean @default(false)
+  completedAt   DateTime?
   createdAt     DateTime @default(now())
 
-  workoutPlan   WorkoutPlan @relation(fields: [planId], references: [id])
+  noteId        Int? @unique
+  note          Notes? @relation(fields: [noteId], references: [id])
+  workoutId     Int?
+  workout       Workout? @relation(fields: [workoutId], references: [id])
 }
 
 // Schema for a Revoked Token
@@ -78,4 +117,9 @@ model RevokedToken {
 enum Role {
   USER
   ADMIN
+}
+
+enum SetType {
+  PLANNED
+  COMPLETED
 }

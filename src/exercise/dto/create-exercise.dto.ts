@@ -1,31 +1,32 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { SetsDto } from "./sets.dot";
 
 export class CreateExerciseDto {
     @ApiProperty({ example: 'Bench' })
     @IsString()
     exerciseName: string;
 
-    @ApiProperty({ example: 'FNEAOF'})
-    @IsString()
-    exerciseId: string;
+    // @ApiProperty({ example: 'FNEAOF'})
+    // @IsString()
+    // exerciseId: string;
 
-    @ApiProperty({ example: 3 })
-    @IsNumber()
-    sets: number;
-
-    @ApiProperty({ example: 4 })
-    @IsNumber()
-    reps: number;
-
-    @ApiProperty({ example: 80 })
-    @IsNumber()
-    weight: number;
+    @ApiProperty({ type: [SetsDto] })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => SetsDto)
+    plannedSets: SetsDto[];
 
     @ApiProperty({ example: 'PTM3M' }) // ISO 8601 format
     @IsString()
     restTime: string;
 
+    @ApiProperty({ example: false })
+    @IsBoolean()
+    @IsOptional()
+    completed: boolean;
+
     @IsNumber()
-    planId: number;
+    workoutId: number;
 }

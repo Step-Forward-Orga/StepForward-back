@@ -5,24 +5,24 @@ import { AuthGuard } from '../authentication/authentication.guard';
 import { User } from '../decorators/user.decorator';
 import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
 
-import { WorkoutPlanService } from './workout-plan.service';
-import { CreateWorkoutPlanDto } from './dto/create-workout-plan.dto';
-import { UpdateWorkoutPlanDto } from './dto/update-workout-plan.dto';
+import { WorkoutService } from './workout.service';
+import { CreateWorkoutDto } from './dto/create-workout.dto';
+import { UpdateWorkoutDto } from './dto/update-workout.dto';
 
 // ? user can create, delete, get, delete his workout plans
 
-@Controller('workout-plan')
+@Controller('workout')
 @UseGuards(AuthGuard)
-export class WorkoutPlanController {
-  constructor(private readonly workoutPlanService: WorkoutPlanService) {}
+export class WorkoutController {
+  constructor(private readonly WorkoutService: WorkoutService) {}
 
   @Post()
   async create(
     @User() user: JwtPayload,
-    @Body() createWorkoutPlanDto: CreateWorkoutPlanDto
+    @Body() CreateWorkoutDto: CreateWorkoutDto
   ) {
     try {
-      return await this.workoutPlanService.create(user.sub, createWorkoutPlanDto);
+      return await this.WorkoutService.create(user.sub, CreateWorkoutDto);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -31,7 +31,7 @@ export class WorkoutPlanController {
   @Get()
   async findAll() {
     try {
-      return await this.workoutPlanService.findAll();
+      return await this.WorkoutService.findAll();
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -40,16 +40,16 @@ export class WorkoutPlanController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.workoutPlanService.findOne(+id);
+      return await this.WorkoutService.findOne(+id);
     } catch (error: unknown) {
       handleErrors(error);
     }
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateWorkoutPlanDto: UpdateWorkoutPlanDto) {
+  async update(@Param('id') id: string, @Body() UpdateWorkoutDto: UpdateWorkoutDto) {
     try {
-      return await this.workoutPlanService.update(+id, updateWorkoutPlanDto);
+      return await this.WorkoutService.update(+id, UpdateWorkoutDto);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -58,7 +58,7 @@ export class WorkoutPlanController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.workoutPlanService.remove(+id);
+      return await this.WorkoutService.remove(+id);
     } catch (error: unknown) {
       handleErrors(error);
     }

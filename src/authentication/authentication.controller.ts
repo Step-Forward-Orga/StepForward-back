@@ -56,7 +56,6 @@ export class AuthenticationController {
                     path: '/',
                     sameSite: 'none'
                 })
-
             return new UserEntity(user)
         } catch (err: unknown) {
             handleErrors(err)

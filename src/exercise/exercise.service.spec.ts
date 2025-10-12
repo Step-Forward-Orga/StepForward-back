@@ -28,39 +28,48 @@ describe('ExerciseService - create', () => {
   });
 
   it('should successfully create a new exercise', async () => {
-    // Arrange
     const createExerciseDto: CreateExerciseDto = {
       exerciseName: 'Bench Press',
-      exerciseId: 'ex-123',
-      sets: 4,
-      reps: 10,
-      weight: 80,
-      restTime: 'PT1M30S', // ISO 8601 rest time
-      planId: 1,
+      restTime: 'PT1M30S',
+      workoutId: 1,
+      plannedSets: [
+        { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
+        { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
+      ],
+      completed: false,
     };
 
     const createdExercise = {
       id: 1,
-      ...createExerciseDto,
+      exerciseName: createExerciseDto.exerciseName,
+      restTime: createExerciseDto.restTime,
+      workoutId: createExerciseDto.workoutId,
+      plannedSets: createExerciseDto.plannedSets,
+      completed: false,
     };
 
     mockPrisma.exercise.create.mockResolvedValueOnce(createdExercise);
 
-    // Act
     const result = await service.create(createExerciseDto);
 
-    // Assert
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
-        exerciseName: 'Bench Press',
-        exerciseId: 'ex-123',
-        sets: 4,
-        reps: 10,
-        weight: 80,
-        restTime: 'PT1M30S',
-        planId: 1,
+        exerciseName: createExerciseDto.exerciseName,
+        restTime: createExerciseDto.restTime,
+        completed: false,
+        workoutId: createExerciseDto.workoutId,
+        plannedSets: {
+          create: [
+            { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
+            { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
+          ],
+        },
+      },
+      include: {
+        plannedSets: true,
       },
     });
+
     expect(result).toEqual(createdExercise);
   });
 
@@ -68,12 +77,13 @@ describe('ExerciseService - create', () => {
     // Arrange
     const createExerciseDto: CreateExerciseDto = {
       exerciseName: 'Bench Press',
-      exerciseId: 'ex-123',
-      sets: 4,
-      reps: 10,
-      weight: 80,
       restTime: 'PT1M30S',
-      planId: 1,
+      workoutId: 1,
+      plannedSets: [
+        { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
+        { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
+      ],
+      completed: false,
     };
 
     const mockError = new Error('Database connection failed');
@@ -85,7 +95,19 @@ describe('ExerciseService - create', () => {
       'Database connection failed',
     );
     expect(prisma.exercise.create).toHaveBeenCalledWith({
-      data: expect.objectContaining(createExerciseDto),
+      data: {
+        exerciseName: createExerciseDto.exerciseName,
+        restTime: createExerciseDto.restTime,
+        completed: false,
+        workoutId: createExerciseDto.workoutId,
+        plannedSets: {
+          create: [
+            { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
+            { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
+          ],
+        },
+      },
+      include: { plannedSets: true },
     });
   });
 });

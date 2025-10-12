@@ -5,16 +5,17 @@ import { Reflector, APP_GUARD } from '@nestjs/core';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthGuard } from '../authentication/authentication.guard';
 
-import { WorkoutPlanController } from './workout-plan.controller';
-import { WorkoutPlanService } from './workout-plan.service';
+import { NotesController } from './notes.controller';
+import { NotesService } from './notes.service';
 
-describe('WorkoutPlanController', () => {
-  let controller: WorkoutPlanController;
+describe('NotesController', () => {
+  let controller: NotesController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [WorkoutPlanController],
-      providers: [WorkoutPlanService,
+      controllers: [NotesController],
+      providers: [
+        NotesService,
         {
           provide: PrismaService,
           useValue: {
@@ -42,7 +43,7 @@ describe('WorkoutPlanController', () => {
       ],
     }).compile();
 
-    controller = module.get<WorkoutPlanController>(WorkoutPlanController);
+    controller = module.get<NotesController>(NotesController);
   });
 
   it('should be defined', () => {

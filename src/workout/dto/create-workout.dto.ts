@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 
-export class CreateWorkoutPlanDto {
+export class CreateWorkoutDto {
     @IsString()
     title: string;
 

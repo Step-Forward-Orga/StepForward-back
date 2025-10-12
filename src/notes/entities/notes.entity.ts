@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 import { UserEntity } from "../../user/entities/user.entity";
 
-export class TrainingNoteEntity {
+export class NotesEntity {
     @ApiProperty({ example: 1})
     id: number;
 

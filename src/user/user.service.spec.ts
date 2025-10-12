@@ -33,35 +33,37 @@ describe('UserService - updatePassword', () => {
     prismaService = module.get<PrismaService>(PrismaService);
   });
 
-  it('should successfully update the password', async () => {
-    // Arrange
-    const userId = 1;
-    const oldPassword = 'oldPassword';
-    const newPassword = 'newPassword';
-    const newPasswordConfirm = 'newPassword';
-    const hashedPassword = 'hashedNewPassword';
+it('should successfully update the password', async () => {
+  const userId = 1;
+  const oldPassword = 'oldPassword';
+  const newPassword = 'newPassword';
+  const hashedPassword = 'hashedNewPassword';
 
-    const mockUser = {
-      id: userId,
-      password: 'hashedOldPassword',
-    };
+  const mockUser = {
+    id: userId,
+    password: 'hashedOldPassword',
+  };
 
-    prismaService.user.findUniqueOrThrow = jest.fn().mockResolvedValueOnce(mockUser);
-    jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true); // Old password matches
-    jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce(hashedPassword);
+  const updateSpy = jest.fn().mockResolvedValue(undefined);
 
-    // Act
-    await service.updatePassword(userId, oldPassword, newPassword, newPasswordConfirm);
+  prismaService.user.findUniqueOrThrow = jest.fn().mockResolvedValueOnce(mockUser);
+  prismaService.user.update = updateSpy;
+  jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true); // Old password matches
+  jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce(hashedPassword);
 
-    // Assert
-    expect(prismaService.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { id: userId } });
-    expect(bcrypt.compare).toHaveBeenCalledWith(oldPassword, mockUser.password);
-    expect(bcrypt.hash).toHaveBeenCalledWith(newPassword, 10);
-    expect(prismaService.user.update).toHaveBeenCalledWith({
-      where: { id: userId },
-      data: { password: hashedPassword },
-    });
+  // Act
+  await service.updatePassword(userId, oldPassword, newPassword, newPassword);
+
+  // Assert
+  expect(prismaService.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { id: userId } });
+  expect(bcrypt.compare).toHaveBeenCalledWith(oldPassword, mockUser.password);
+  expect(bcrypt.hash).toHaveBeenCalledWith(newPassword, 10);
+  expect(updateSpy).toHaveBeenCalledTimes(1);
+  expect(updateSpy).toHaveBeenCalledWith({
+    where: { id: userId },
+    data: { password: hashedPassword },
   });
+});
 
   it('should throw BadRequestException if passwords do not match', async () => {
     // Arrange
