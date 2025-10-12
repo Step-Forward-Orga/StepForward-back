@@ -27,9 +27,6 @@ services:
       - ./prisma:/app/prisma
       - ./docker/wait-for.sh:/wait-for.sh
       - ./.env:/app/.env
-      - ./.eslintrc.js:/app/.eslintrc.js
-      - ./.prettierrc:/app/.prettierrc
-      - ./nest-cli.json:/app/nest-cli.json
 
   database:
     container_name: db

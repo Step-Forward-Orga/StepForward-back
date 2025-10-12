@@ -10,9 +10,9 @@ async function bootstrap() {
   app.enableCors({
     credentials: true,
     origin:
-      process.env.NODE_ENV === 'prod'
+      (process.env.NODE_ENV === 'prod'
       ? (process.env.FRONT_URL as string)
-      : `*`
+      : ( process.env.NODE_ENV === 'staging' ? (process.env.FRONT_URL as string) : `*`))
   })
   app.use(cookieParser());
   app.useGlobalPipes(
