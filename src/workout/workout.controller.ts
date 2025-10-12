@@ -11,7 +11,7 @@ import { UpdateWorkoutDto } from './dto/update-workout.dto';
 
 // ? user can create, delete, get, delete his workout plans
 
-@Controller('workout-plan')
+@Controller('workout')
 @UseGuards(AuthGuard)
 export class WorkoutController {
   constructor(private readonly WorkoutService: WorkoutService) {}

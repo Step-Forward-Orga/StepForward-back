@@ -69,26 +69,37 @@ model WorkoutCycle {
   workouts    Workout[]
 }
 
+model Set {
+  id         Int      @id @default(autoincrement())
+  reps       Int
+  weight     Float
+  order      Int // Order of the set in the exercise
+  createdAt  DateTime @default(now())
+  type       SetType // PLANNED or COMPLETED
+
+  plannedForId Int?
+  plannedFor   Exercise? @relation("PlannedSets", fields: [plannedForId], references: [id])
+  completedForId Int?
+  completedFor Exercise? @relation("CompletedSets", fields: [completedForId], references: [id])
+}
+
 // Schema for a Exercise
 model Exercise {
   id            Int      @id @default(autoincrement())
-  planId        Int
   exerciseName  String
-  exerciseId    String
-  sets          Int
-  aimed_reps    Int
-  aimed_weight  Int
-
+  //! exerciseId    String In the future were the exercise dataset will be used
+  plannedSetsId Int?
+  plannedSets   Set[] @relation("PlannedSets")
   restTime      String?
-  createdAt     DateTime @default(now())
 
+  completedSetsId Int?
+  completedSets Set[] @relation("CompletedSets")
   completed     Boolean @default(false)
   completedAt   DateTime?
-  completedWeight Int?
-  completedReps Int?
-  completedSets Int?
+  createdAt     DateTime @default(now())
 
-  workout   Workout @relation(fields: [planId], references: [id])
+  workoutId     Int?
+  workout       Workout? @relation(fields: [workoutId], references: [id])
 }
 
 // Schema for a Revoked Token
@@ -102,4 +113,9 @@ model RevokedToken {
 enum Role {
   USER
   ADMIN
+}
+
+enum SetType {
+  PLANNED
+  COMPLETED
 }

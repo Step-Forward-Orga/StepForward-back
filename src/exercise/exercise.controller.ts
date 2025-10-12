@@ -6,6 +6,7 @@ import { handleErrors } from '../utils/handle-errors';
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
+import { CompleteExerciseDto } from './dto/complete-exercise.dto';
 
 @Controller('Exercise')
 @UseGuards(AuthGuard)
@@ -43,6 +44,15 @@ export class ExerciseController {
   async update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     try {
       return await this.ExerciseService.update(+id, updateExerciseDto);
+    } catch (error: unknown) {
+      handleErrors(error);
+    }
+  }
+
+  @Patch(':id/complete')
+  async complete(@Param('id') id: string, @Body() completeExerciseDto: CompleteExerciseDto) {
+    try {
+      return await this.ExerciseService.complete(+id, completeExerciseDto);
     } catch (error: unknown) {
       handleErrors(error);
     }
