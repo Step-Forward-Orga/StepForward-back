@@ -1,7 +1,7 @@
-import { ExerciseEntity } from "src/exercise/entities/exercise.entity";
-import { UserEntity } from "src/user/entities/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { NotesEntity } from "src/notes/entities/notes.entity";
+import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
+import { UserEntity } from "../../user/entities/user.entity";
+import { NotesEntity } from "../../notes/entities/notes.entity";
 
 export class WorkoutEntity {
     @ApiProperty({ example: 1 })
@@ -33,7 +33,7 @@ export class WorkoutEntity {
 
     // workoutProgramId: number;
     // workoutProgram: WorkoutProgramEntity;
-    
+
     constructor(partial: Partial<WorkoutEntity>) {
         Object.assign(this, partial)
     }
