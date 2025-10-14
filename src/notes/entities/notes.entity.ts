@@ -3,6 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { UserEntity } from "../../user/entities/user.entity";
 import { WorkoutEntity } from "../../workout/entities/workout.entity";
 import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
+import { Type } from "class-transformer";
 
 export class NotesEntity {
     @ApiProperty({ example: 1})
@@ -24,6 +25,7 @@ export class NotesEntity {
     workoutId?: number;
 
     @ApiProperty({ type: () => WorkoutEntity })
+    @Type(() => WorkoutEntity)
     workout?: WorkoutEntity;
 
     @ApiProperty({ example: 1 })
@@ -35,24 +37,14 @@ export class NotesEntity {
     exerciseId?: number;
 
     @ApiProperty({ type: () => ExerciseEntity })
+    @Type(() => ExerciseEntity)
     exercise?: ExerciseEntity;
 
     @ApiProperty({ type: () => UserEntity })
-    user: UserEntity;
+    @Type(() => UserEntity)
+    user?: UserEntity;
 
     constructor(partial: Partial<NotesEntity>) {
         Object.assign(this, partial)
-
-        if (partial.user) {
-            this.user = new UserEntity(partial.user);
-        }
-
-        if (partial.workout) {
-            this.workout = new WorkoutEntity(partial.workout);
-        }
-
-        if (partial.exercise) {
-            this.exercise = new ExerciseEntity(partial.exercise);
-        }
     }
 }

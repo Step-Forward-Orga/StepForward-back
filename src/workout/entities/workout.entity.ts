@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { NotesEntity } from "../../notes/entities/notes.entity";
+import { Type } from "class-transformer";
 
 export class WorkoutEntity {
     @ApiProperty({ example: 1 })
@@ -26,13 +27,16 @@ export class WorkoutEntity {
     workoutCycleId?: number;
 
     @ApiProperty({ type: () => NotesEntity})
+    @Type(() => NotesEntity)
     note?: NotesEntity;
 
     @ApiProperty({ type: () => UserEntity })
+    @Type(() => UserEntity)
     user: UserEntity;
 
     @ApiProperty({ type: () => [ExerciseEntity] })
-    exercises: ExerciseEntity[];
+    @Type(() => ExerciseEntity)
+    exercises?: ExerciseEntity[];
 
     workoutCycle?: any; //change once workout program module is implemented
 

@@ -22,7 +22,7 @@ model User {
   createdAt DateTime @default(now())
   roles      Role[]   @default([USER])
 
-  Notes Notes[] //TODO: CHANGE TO minus n
+  Notes   Notes[] //TODO: CHANGE TO minus n
   workout Workout[]
   workoutCycle WorkoutCycle[]
 }

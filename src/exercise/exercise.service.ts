@@ -11,6 +11,7 @@ export class ExerciseService {
   constructor(
     private readonly prisma: PrismaService
   ) {}
+
   async create(createExerciseDto: CreateExerciseDto) {
     return await this.prisma.exercise.create({
       data: {
@@ -51,32 +52,23 @@ export class ExerciseService {
   }
 
   async findAll() {
-    return await this.prisma.exercise.findMany(
-      {
-        include: {
-          plannedSets: true,
-          completedSets: true,
-          workout: {
-            include: {
-              note: { include: { user: true } },
-              user: { include: { Notes: true } },
-              exercises: {
-                include: { plannedSets: true, completedSets: true, note: true, workout: true }
-              },
-              workoutCycle: true, //change once workout program module is implemented
-            }
-          },
-          note: {
-            include: {
-              user: true,
-              workout: true,
-              exercise: true,
-              workoutCycle: true, //change once workout program module is implemented
-            }
-          }, 
+    return await this.prisma.exercise.findMany({
+      include: { 
+        plannedSets: true,
+        completedSets: true,
+        workout: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+              }
+            }          }
         },
-      }
-    );
+        note: true
+      },
+      }); 
   }
 
   async findOne(id: number) {

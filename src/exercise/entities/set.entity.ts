@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ExerciseEntity } from "./exercise.entity";
+import { Type } from "class-transformer";
 
 export class SetEntity {
     @ApiProperty({ example: 1 })
@@ -24,12 +25,14 @@ export class SetEntity {
     plannedForId?: number;
 
     @ApiProperty({ type: () => ExerciseEntity })
+    @Type(() => ExerciseEntity)
     plannedFor?: ExerciseEntity;
 
     @ApiProperty({ example: 1 })
     completedForId?: number;
 
     @ApiProperty({ type: () => ExerciseEntity })
+    @Type(() => ExerciseEntity)
     completedFor?: ExerciseEntity;
 
     constructor(partial: Partial<SetEntity>) {

@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude, Type } from "class-transformer";
 import { NotesEntity } from "src/notes/entities/notes.entity";
 import { WorkoutEntity } from "src/workout/entities/workout.entity";
 
@@ -12,17 +13,22 @@ export class UserEntity {
     @ApiProperty({ example: 'username' })
     username: string;
 
+    @Exclude()
+    password?: string;
+
     @ApiProperty({ example: '2024-11-29T10:43:11.376Z' })
-    createdAt: Date;
+    createdAt?: Date;
 
     @ApiProperty({ type: () => [NotesEntity] })
-    Notes: NotesEntity[]; //TODO: CHANGE TO minus n and update schema
+    @Type(() => NotesEntity)
+    Notes?: NotesEntity[]; //TODO: CHANGE TO minus n and update schema
 
     @ApiProperty({ type: () => [WorkoutEntity] })
-    workouts: WorkoutEntity[];
+    @Type(() => WorkoutEntity)
+    workouts?: WorkoutEntity[];
 
 
-    workoutCycles: any[]; //change once workout program module is implemented
+    workoutCycles?: any[]; //change once workout program module is implemented
 
     constructor(partial: Partial<UserEntity>) {
         Object.assign(this, partial)

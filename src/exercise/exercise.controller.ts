@@ -30,9 +30,9 @@ export class ExerciseController {
     try {
       const exercises = await this.ExerciseService.findAll();
 
-      return exercises;
+      // return exercises;
       //TODO: fix the line below, problem with the entities declarations
-      // return exercises.map((exercise) => new ExerciseEntity(exercise));
+      return exercises.map((exercise) => new ExerciseEntity(exercise));
     } catch (error: unknown) {
       handleErrors(error);
     }
