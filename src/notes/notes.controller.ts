@@ -32,10 +32,11 @@ export class NotesController {
       @User() user: JwtPayload,
     ) {
       try {
-          return this.NotesService.create(
+          const notes = await this.NotesService.create(
             user.sub,
             CreateNotesDto
           );
+          return new NotesEntity(notes);
       } catch (err: unknown) {
         handleErrors(err);
       }
@@ -48,7 +49,8 @@ export class NotesController {
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ApiResponseBody})
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async findAll() {
-    return this.NotesService.findAll();
+    const notes = await this.NotesService.findAll();
+    return notes.map((note) => new NotesEntity(note));
   }
 
   @Get(':id')
@@ -59,7 +61,8 @@ export class NotesController {
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async findOne(@Param('id') id: string) {
-    return this.NotesService.findOne(+id);
+    const note = await this.NotesService.findOne(+id);
+    return new NotesEntity(note);
   }
 
   @Patch(':id')
@@ -71,7 +74,8 @@ export class NotesController {
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async update(@Param('id') id: string, @Body() UpdateNotesDto: UpdateNotesDto) {
-    return this.NotesService.update(+id, UpdateNotesDto);
+    const note = await this.NotesService.update(+id, UpdateNotesDto);
+    return new NotesEntity(note);
   }
 
   @Delete(':id')
@@ -82,6 +86,7 @@ export class NotesController {
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async remove(@Param('id') id: string) {
-    return this.NotesService.remove(+id);
+    const note = await this.NotesService.remove(+id);
+    return new NotesEntity(note);
   }
 }

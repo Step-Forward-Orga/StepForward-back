@@ -68,7 +68,7 @@ export class ExerciseService {
         },
         note: true
       },
-      }); 
+    }); 
   }
 
   async findOne(id: number) {
