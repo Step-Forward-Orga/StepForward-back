@@ -12,10 +12,10 @@ export class NotesEntity {
     userId: number;
 
     @ApiProperty({ example: "Example Title" })
-    title: string;
+    title?: string;
 
     @ApiProperty({ example: "note content" })
-    note: string;
+    note?: string;
 
     @ApiProperty({ example: "2024-11-29T10:43:11.376Z" })
     createdAt: Date;
@@ -23,23 +23,36 @@ export class NotesEntity {
     @ApiProperty({ example: 1 })
     workoutId?: number;
 
-    @ApiProperty({ example: WorkoutEntity })
+    @ApiProperty({ type: () => WorkoutEntity })
     workout?: WorkoutEntity;
 
-    // workoutProgramId?: number;
+    @ApiProperty({ example: 1 })
+    workoutCycleId?: number; //change once workout program module is implemented
 
-    // workoutProgram?: WorkoutProgramEntity;
+    workoutCycle?: any; //change once workout program module is implemented
 
     @ApiProperty({ example: 1 })
     exerciseId?: number;
 
-    @ApiProperty({ example: ExerciseEntity })
+    @ApiProperty({ type: () => ExerciseEntity })
     exercise?: ExerciseEntity;
 
-    @ApiProperty({ example: UserEntity })
+    @ApiProperty({ type: () => UserEntity })
     user: UserEntity;
 
     constructor(partial: Partial<NotesEntity>) {
         Object.assign(this, partial)
+
+        if (partial.user) {
+            this.user = new UserEntity(partial.user);
+        }
+
+        if (partial.workout) {
+            this.workout = new WorkoutEntity(partial.workout);
+        }
+
+        if (partial.exercise) {
+            this.exercise = new ExerciseEntity(partial.exercise);
+        }
     }
 }

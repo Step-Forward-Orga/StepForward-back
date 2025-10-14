@@ -10,13 +10,13 @@ export class ExerciseEntity {
     @ApiProperty({ example: "Squat" })
     exerciseName: string;
 
-    @ApiProperty({ example: [SetEntity] })
+    @ApiProperty({ type: () => [SetEntity] })
     plannedSets: SetEntity[];
 
     @ApiProperty({ example: "PTM3M" })
     restTime: string;
 
-    @ApiProperty({ example: [SetEntity] })
+    @ApiProperty({ type: () => [SetEntity] })
     completedSets?: SetEntity[];
 
     @ApiProperty({ example: false })
@@ -28,13 +28,13 @@ export class ExerciseEntity {
     @ApiProperty({ example: 1 })
     noteId?: number;
 
-    @ApiProperty({ example: NotesEntity })
+    @ApiProperty({ type: () => NotesEntity })
     note?: NotesEntity
 
     @ApiProperty({ example: 1 })
     workoutId: number;
 
-    @ApiProperty({ example: WorkoutEntity })
+    @ApiProperty({ type: () => WorkoutEntity })
     workout: WorkoutEntity;
 
     @ApiProperty({ example: new Date() })
@@ -42,5 +42,21 @@ export class ExerciseEntity {
 
     constructor(partial: Partial<ExerciseEntity>) {
         Object.assign(this, partial)
+
+        if (partial.note) {
+            this.note = new NotesEntity(partial.note);
+        }
+
+        if (partial.workout) {
+            this.workout = new WorkoutEntity(partial.workout);
+        }
+
+        if (partial.plannedSets) {
+            this.plannedSets = partial.plannedSets.map((set) => new SetEntity(set));
+        }
+
+        if (partial.completedSets) {
+            this.completedSets = partial.completedSets.map((set) => new SetEntity(set));
+        }
     }
 }

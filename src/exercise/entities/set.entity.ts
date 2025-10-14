@@ -23,13 +23,13 @@ export class SetEntity {
     @ApiProperty({ example: 1 })
     plannedForId?: number;
 
-    @ApiProperty({ example: ExerciseEntity })
+    @ApiProperty({ type: () => ExerciseEntity })
     plannedFor?: ExerciseEntity;
 
     @ApiProperty({ example: 1 })
     completedForId?: number;
 
-    @ApiProperty({ example: ExerciseEntity })
+    @ApiProperty({ type: () => ExerciseEntity })
     completedFor?: ExerciseEntity;
 
     constructor(partial: Partial<SetEntity>) {

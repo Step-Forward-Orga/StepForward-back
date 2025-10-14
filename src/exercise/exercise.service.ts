@@ -56,8 +56,24 @@ export class ExerciseService {
         include: {
           plannedSets: true,
           completedSets: true,
-          workout: true,
-          note: true,
+          workout: {
+            include: {
+              note: { include: { user: true } },
+              user: { include: { Notes: true } },
+              exercises: {
+                include: { plannedSets: true, completedSets: true, note: true, workout: true }
+              },
+              workoutCycle: true, //change once workout program module is implemented
+            }
+          },
+          note: {
+            include: {
+              user: true,
+              workout: true,
+              exercise: true,
+              workoutCycle: true, //change once workout program module is implemented
+            }
+          }, 
         },
       }
     );
