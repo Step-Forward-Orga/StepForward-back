@@ -2,25 +2,25 @@
 
 ## Description
 
+This app as for goal to improve my skills as a full-stack developer, with a compilation of good behaviors, github projects, pull-requests, unit tests.
+
+Im also adding Devops feature like github workflow, containerization, maybe jenkins pipeline in the future as well as some plays with kubernetes to learn new stuff, everything will than be hosted in a serverless environnement when finished.
+
 The backend of stepfoward app in [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+## setup the project
+rename then .env.example to .env should do the trick (you can customize it as wished)
+
+## install dependencies
 
 ```bash
 $ npm install
 ```
 
-## Compile and run the project
+## run the project
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker compose up -d --build
 ```
 
 ## Run tests
@@ -30,11 +30,19 @@ $ npm run start:prod
 $ npm run test
 
 # e2e tests
-$ npm run test:e2e
+#$ npm run test:e2e comming soon
 
 # test coverage
 $ npm run test:cov
 ```
+
+## How does it work
+
+<img src=".github/assets/architecture1.png" />
+<img src=".github/assets/architecture2.png" />
+Each user can have multiple workout cycles, with multiple workouts, that contains exercises were you plan the number of sets you want to do and upon completion, writing your actual performances with notes on everything
+
+You can than get the total weight lifted, see your progress on exercise, between similar workouts .etc.
 
 ## Resources
 
