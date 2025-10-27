@@ -22,7 +22,7 @@ model User {
   createdAt DateTime @default(now())
   roles      Role[]   @default([USER])
 
-  Notes Notes[]
+  Notes   Notes[] //TODO: CHANGE TO minus n
   workout Workout[]
   workoutCycle WorkoutCycle[]
 }
@@ -102,8 +102,8 @@ model Exercise {
 
   noteId        Int? @unique
   note          Notes? @relation(fields: [noteId], references: [id])
-  workoutId     Int?
-  workout       Workout? @relation(fields: [workoutId], references: [id])
+  workoutId     Int
+  workout       Workout @relation(fields: [workoutId], references: [id])
 }
 
 // Schema for a Revoked Token

@@ -134,7 +134,7 @@ describe('AuthenticationService', () => {
         username: 'testuser',
         password: 'hashedPassword',
       };
-  
+
       const mockSignUpDto = {
         email: 'test@example.com',
         username: 'testuser',
@@ -203,7 +203,7 @@ describe('AuthenticationService', () => {
         id: 1,
         email: 'test@example.com',
         username: 'testuser',
-        password: 'hashedPassword',
+        password: 'hashedPassword'
       };
   
       const mockCredentials = {
@@ -231,10 +231,17 @@ describe('AuthenticationService', () => {
             { username: mockCredentials.identification },
           ],
         },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          password: true,
+          roles: true,
+        },
       });
       expect(bcrypt.compare).toHaveBeenCalledWith(
-        mockCredentials.password,
-        mockUser.password,
+        'plainPassword',
+        'hashedPassword'
       );
       expect(service.generateTokens).toHaveBeenCalledWith(mockUser.id);
       expect(result).toEqual({

@@ -56,6 +56,8 @@ export class AuthenticationService {
         const user = await this.prisma.user.create({ data: newUser });
 
         const tokens = await this.generateTokens(user.id);
+
+        delete user.password;
         return { user, tokens }
     }
 
@@ -68,6 +70,13 @@ export class AuthenticationService {
                     { email: identification },
                     { username: identification },
                 ],
+            },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                password: true,
+                roles: true,
             }
         })
 
@@ -81,6 +90,8 @@ export class AuthenticationService {
         
         const tokens = await this.generateTokens(user.id);
         
+        delete user.password;
+
         return { user, tokens };
     }
 
