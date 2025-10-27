@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Type } from "class-transformer";
-import { NotesEntity } from "src/notes/entities/notes.entity";
-import { WorkoutEntity } from "src/workout/entities/workout.entity";
+import { NotesEntity } from "../../notes/entities/notes.entity";
+import { WorkoutEntity } from "../..//workout/entities/workout.entity";
 
 export class UserEntity {
     @ApiProperty({ example: 1 })
