@@ -5,7 +5,7 @@ import { UserEntity } from "../../user/entities/user.entity";
 import { WorkoutEntity } from "../../workout/entities/workout.entity";
 import { Type } from "class-transformer";
 
-export class WorkoutProgram {
+export class WorkoutProgramEntity {
     @ApiProperty({ example: 1 })
     id: number;
 
@@ -36,7 +36,19 @@ export class WorkoutProgram {
     @Type(() => WorkoutEntity)
     workouts?: WorkoutEntity[];
 
-    constructor(partial: Partial<WorkoutProgram>) {
+    constructor(partial: Partial<WorkoutProgramEntity>) {
         Object.assign(this, partial)
-    }
+
+        if (partial.user) {
+            this.user = new UserEntity(partial.user);
+        }
+
+        if (partial.note) {
+            this.note = new NotesEntity(partial.note);
+        }
+        
+        if (partial.workouts) {
+            this.workouts = partial.workouts.map((workout) => new WorkoutEntity(workout));
+        }
+    }    
 }

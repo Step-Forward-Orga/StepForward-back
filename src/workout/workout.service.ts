@@ -12,13 +12,15 @@ export class WorkoutService {
   ) {}
   async create(
     userId: number,
-    createWorkoutDto: CreateWorkoutDto
+    createWorkoutDto: CreateWorkoutDto,
+    workoutProgramId: number
   ) {
     return await this.prisma.workout.create({
       data: {
-        userId,
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
+        user: { connect: { id: userId } },
+        workoutProgram: workoutProgramId ? { connect: { id: workoutProgramId } } : undefined,
       },
     });
   }

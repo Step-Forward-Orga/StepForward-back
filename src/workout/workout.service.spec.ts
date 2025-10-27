@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { WorkoutService } from './workout.service';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
+import { connect } from 'net';
 
 describe('WorkoutService - create', () => {
   let service: WorkoutService;
@@ -41,19 +42,22 @@ describe('WorkoutService - create', () => {
       userId: 1,
       title: 'My First Plan',
       description: 'A great workout plan',
+      user: { id: 1, username: 'john' }, // simplified user
+      workoutProgram: { id: 1, name: 'Upper Split' }, // if needed
     };
 
     mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout);
 
     // Act
-    const result = await service.create(userId, CreateWorkoutDto);
+    const result = await service.create(userId, CreateWorkoutDto, 1);
 
     // Assert
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
-        userId,
+        user: { connect: { id: userId } },
         title: CreateWorkoutDto.title,
         description: CreateWorkoutDto.description,
+        workoutProgram: { connect: { id: 1 } },
       },
     });
 
@@ -73,15 +77,16 @@ describe('WorkoutService - create', () => {
     mockPrisma.workout.create.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.create(userId, CreateWorkoutDto)).rejects.toThrow(
+    await expect(service.create(userId, CreateWorkoutDto, 1)).rejects.toThrow(
       'Database error',
     );
 
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
-        userId,
+        user: { connect: { id: userId } },
         title: CreateWorkoutDto.title,
         description: CreateWorkoutDto.description,
+        workoutProgram: { connect: { id: 1 } },
       },
     });
   });

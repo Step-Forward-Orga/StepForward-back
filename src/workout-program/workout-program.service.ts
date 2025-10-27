@@ -1,26 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWorkoutProgramDto } from './dto/create-workout-program.dto';
 import { UpdateWorkoutProgramDto } from './dto/update-workout-program.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WorkoutProgramService {
-  create(createWorkoutProgramDto: CreateWorkoutProgramDto) {
-    return 'This action adds a new workoutProgram';
+  constructor(
+    private readonly prisma: PrismaService
+  ) {} 
+  async create(userId: number, createWorkoutProgramDto: CreateWorkoutProgramDto) {
+    return await this.prisma.workoutProgram.create({
+      data: {
+        title: createWorkoutProgramDto.title,
+        description: createWorkoutProgramDto.description,
+        user: { connect: { id: userId } },
+      }
+    });
   }
 
-  findAll() {
-    return `This action returns all workoutProgram`;
+  async findAll() {
+    return await this.prisma.workoutProgram.findMany({
+      include: {
+        workouts: {
+          include: {
+            user: true,
+          }
+        },
+        user: true,
+        note: true
+      }
+    }
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workoutProgram`;
+  async findOne(id: number) {
+    return await this.prisma.workoutProgram.findUniqueOrThrow({
+      where: { id },
+      include: {
+        workouts: {
+          include: {
+            user: true,
+          }
+        },
+        user: true,
+        note: true
+      }
+    });
   }
 
-  update(id: number, updateWorkoutProgramDto: UpdateWorkoutProgramDto) {
-    return `This action updates a #${id} workoutProgram`;
+  async update(id: number, updateWorkoutProgramDto: UpdateWorkoutProgramDto) {
+    return await this.prisma.workoutProgram.update({
+      where: { id },
+      data: updateWorkoutProgramDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workoutProgram`;
+  async remove(id: number) {
+    return await this.prisma.workoutProgram.delete({
+      where: { id },
+    });
   }
 }

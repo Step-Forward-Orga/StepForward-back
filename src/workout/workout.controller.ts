@@ -17,13 +17,14 @@ import { WorkoutEntity } from './entities/workout.entity';
 export class WorkoutController {
   constructor(private readonly WorkoutService: WorkoutService) {}
 
-  @Post()
+  @Post(':id')
   async create(
     @User() user: JwtPayload,
-    @Body() CreateWorkoutDto: CreateWorkoutDto
+    @Body() CreateWorkoutDto: CreateWorkoutDto,
+    @Param('id') workoutProgramId: string,
   ) {
     try {
-      const workout = await this.WorkoutService.create(user.sub, CreateWorkoutDto);
+      const workout = await this.WorkoutService.create(user.sub, CreateWorkoutDto, +workoutProgramId);
       return new WorkoutEntity(workout);
     } catch (error: unknown) {
       handleErrors(error);
