@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
-    command: ["sh", "-c", "/wait-for.sh db && npx prisma migrate deploy && npm run start:dev"]
+    command: ["sh", "-c", "/wait-for.sh db && npx prisma migrate deploy && (npm run start:dev & npm run studio)"]
     environment:
       - NODE_ENV=dev
       - PORT=${PORT}
@@ -16,8 +16,10 @@ services:
       - database
     ports:
       - 8080:8080
+      - 5555:5555
     networks:
       - database_network
+      # - prisma_studio_network
     volumes:
       - node_modules:/app/node_modules
       - ./src:/app/src
@@ -42,19 +44,24 @@ services:
     networks:
     - database_network 
 
-  prisma-studio:
-    container_name: prisma-studio
-    image: timothyjmiller/prisma-studio:latest
-    environment:
-      POSTGRES_URL: ${DATABASE_URL}
-    depends_on:
-      - database
-    ports:
-      - 5555:5555
-    command: ["--port", "5555"]
+  # prisma-studio:
+  #   container_name: prisma-studio
+  #   image: timothyjmiller/prisma-studio:latest
+  #   environment:
+  #     POSTGRES_URL: postgresql://root:azertyuiop@localhost:5432/stepfowarddb
+  #   depends_on:
+  #     - database
+  #   ports:
+  #     - 5555:5555
+  #   networks:
+  #     - prisma_studio_network
+  #   command: ["--port", "5555"]
+  #   volumes:
+  #     - ./prisma:/app/prisma
 
 networks:
   database_network:
+  # prisma_studio_network:
   
 volumes:
   node_modules:

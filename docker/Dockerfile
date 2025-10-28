@@ -52,4 +52,4 @@ RUN chmod +x /wait-for.sh
 EXPOSE 5555
 EXPOSE 8080
 
-CMD ["sh", "-c", "rm -rf /app/dist && npm run build && npm run start:dev"]
+CMD ["sh", "-c", "rm -rf /app/dist && npm run build && (npm run start:dev & npm run studio)"]

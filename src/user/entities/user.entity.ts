@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Type } from "class-transformer";
 import { NotesEntity } from "../../notes/entities/notes.entity";
 import { WorkoutEntity } from "../..//workout/entities/workout.entity";
+import { WorkoutProgramEntity } from "../../workout-program/entities/workout-program.entity";
 
 export class UserEntity {
     @ApiProperty({ example: 1 })
@@ -21,28 +22,29 @@ export class UserEntity {
 
     @ApiProperty({ type: () => [NotesEntity] })
     @Type(() => NotesEntity)
-    Notes?: NotesEntity[]; //TODO: CHANGE TO minus n and update schema
+    notes?: NotesEntity[];
 
     @ApiProperty({ type: () => [WorkoutEntity] })
     @Type(() => WorkoutEntity)
     workouts?: WorkoutEntity[];
 
-
-    workoutCycles?: any[]; //change once workout program module is implemented
+    @ApiProperty({ type: () => [WorkoutEntity] })
+    @Type(() => WorkoutEntity)
+    workoutPrograms?: WorkoutProgramEntity[]; //change once workout program module is implemented
 
     constructor(partial: Partial<UserEntity>) {
         Object.assign(this, partial)
 
-        if (partial.Notes) {
-            this.Notes = partial.Notes.map((note) => new NotesEntity(note));
+        if (partial.notes) {
+            this.notes = partial.notes.map((note) => new NotesEntity(note));
         }
 
         if (partial.workouts) {
             this.workouts = partial.workouts.map((workout) => new WorkoutEntity(workout));
         }
 
-        // if (partial.workoutPrograms) {
-        //     this.workoutPrograms = partial.workoutPrograms.map((program) => new WorkoutProgramEntity(program));
-        // }
+        if (partial.workoutPrograms) {
+            this.workoutPrograms = partial.workoutPrograms.map((program) => new WorkoutProgramEntity(program));
+        }
     }
 }

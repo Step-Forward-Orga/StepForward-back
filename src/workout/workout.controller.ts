@@ -20,10 +20,24 @@ export class WorkoutController {
   @Post()
   async create(
     @User() user: JwtPayload,
-    @Body() CreateWorkoutDto: CreateWorkoutDto
+    @Body() CreateWorkoutDto: CreateWorkoutDto,
   ) {
     try {
       const workout = await this.WorkoutService.create(user.sub, CreateWorkoutDto);
+      return new WorkoutEntity(workout);
+    } catch (error: unknown) {
+      handleErrors(error);
+    }
+  }
+
+  @Post(':id')
+  async create_linked(
+    @User() user: JwtPayload,
+    @Body() CreateWorkoutDto: CreateWorkoutDto,
+    @Param('id') workoutProgramId: string,
+  ) {
+    try {
+      const workout = await this.WorkoutService.create_linked(user.sub, CreateWorkoutDto, +workoutProgramId);
       return new WorkoutEntity(workout);
     } catch (error: unknown) {
       handleErrors(error);

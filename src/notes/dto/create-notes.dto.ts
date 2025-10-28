@@ -16,7 +16,7 @@ export class CreateNotesDto {
 
     @IsNumber()
     @IsOptional()
-    workoutCycleId?: number;
+    workoutProgramId?: number;
 
     @IsNumber()
     @IsOptional()

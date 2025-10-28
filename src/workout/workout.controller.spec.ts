@@ -18,7 +18,7 @@ describe('WorkoutController', () => {
         {
           provide: PrismaService,
           useValue: {
-            trainingNote: {
+            workout: {
               findUnique: jest.fn(),
               create: jest.fn(),
               update: jest.fn(),

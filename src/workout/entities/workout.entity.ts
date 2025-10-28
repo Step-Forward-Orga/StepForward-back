@@ -3,6 +3,7 @@ import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { NotesEntity } from "../../notes/entities/notes.entity";
 import { Type } from "class-transformer";
+import { WorkoutProgramEntity } from "../../workout-program/entities/workout-program.entity";
 
 export class WorkoutEntity {
     @ApiProperty({ example: 1 })
@@ -38,10 +39,12 @@ export class WorkoutEntity {
     @Type(() => ExerciseEntity)
     exercises?: ExerciseEntity[];
 
-    workoutCycle?: any; //change once workout program module is implemented
+    @ApiProperty({ example: 1 })
+    workoutProgramId?: number;
 
-    // workoutProgramId: number;
-    // workoutProgram: WorkoutProgramEntity;
+    @ApiProperty({ type: () => WorkoutProgramEntity })
+    @Type(() => WorkoutProgramEntity)
+    workoutProgram?: WorkoutProgramEntity;
 
     constructor(partial: Partial<WorkoutEntity>) {
         Object.assign(this, partial)
@@ -58,8 +61,8 @@ export class WorkoutEntity {
             this.exercises = partial.exercises.map((exercise) => new ExerciseEntity(exercise));
         }
 
-        if (partial.workoutCycle) {
-            this.workoutCycle = partial.workoutCycle; //change once workout program module is implemented
+        if (partial.workoutProgram) {
+            this.workoutProgram = new WorkoutProgramEntity(partial.workoutProgram);
         }
     }
 }
