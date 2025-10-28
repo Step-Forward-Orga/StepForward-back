@@ -35,7 +35,14 @@ describe('WorkoutController', () => {
         },
         {
           provide: PrismaService,
-          useValue: {},
+          useValue: {
+            workout: {
+              findUnique: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+              delete: jest.fn(),
+            },
+          },
         },
         {
           provide: JwtService,

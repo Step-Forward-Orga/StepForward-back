@@ -7,6 +7,7 @@ import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import { CompleteExerciseDto } from './dto/complete-exercise.dto';
+import { ExerciseEntity } from './entities/exercise.entity';
 
 @Controller('Exercise')
 @UseGuards(AuthGuard)
@@ -16,7 +17,9 @@ export class ExerciseController {
   @Post()
   async create(@Body() createExerciseDto: CreateExerciseDto) {
     try {
-      return await this.ExerciseService.create(createExerciseDto);
+      const exercise = await this.ExerciseService.create(createExerciseDto);
+
+      return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -25,7 +28,11 @@ export class ExerciseController {
   @Get()
   async findAll() {
     try {
-      return await this.ExerciseService.findAll();
+      const exercises = await this.ExerciseService.findAll();
+
+      // return exercises;
+      //TODO: fix the line below, problem with the entities declarations
+      return exercises.map((exercise) => new ExerciseEntity(exercise));
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -34,7 +41,8 @@ export class ExerciseController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.ExerciseService.findOne(+id);
+      const exercise =  await this.ExerciseService.findOne(+id);
+      return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -43,7 +51,8 @@ export class ExerciseController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     try {
-      return await this.ExerciseService.update(+id, updateExerciseDto);
+      const exercise =  await this.ExerciseService.update(+id, updateExerciseDto);
+      return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -52,7 +61,8 @@ export class ExerciseController {
   @Patch(':id/complete')
   async complete(@Param('id') id: string, @Body() completeExerciseDto: CompleteExerciseDto) {
     try {
-      return await this.ExerciseService.complete(+id, completeExerciseDto);
+      const exercise = await this.ExerciseService.complete(+id, completeExerciseDto);
+      return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -61,7 +71,8 @@ export class ExerciseController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      return await this.ExerciseService.remove(+id);
+      const exercise = await this.ExerciseService.remove(+id);
+      return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }

@@ -22,9 +22,9 @@ model User {
   createdAt DateTime @default(now())
   roles      Role[]   @default([USER])
 
-  Notes Notes[]
+  notes   Notes[]
   workout Workout[]
-  workoutCycle WorkoutCycle[]
+  workoutProgram WorkoutProgram[]
 }
 
 // Schema for written notes in a workout or workout cycle
@@ -37,8 +37,8 @@ model Notes {
 
   workoutId Int?
   workout   Workout?
-  workoutCycleId Int?
-  workoutCycle WorkoutCycle?
+  workoutProgramId Int?
+  workoutProgram WorkoutProgram?
   exerciseId Int?
   exercise  Exercise?
   user      User @relation(fields: [userId], references: [id])
@@ -52,15 +52,15 @@ model Workout {
   description String @default("")
   createdAt   DateTime @default(now())
   noteId Int? @unique
-  workoutCycleId Int?
+  workoutProgramId Int?
 
   note  Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
   exercises   Exercise[]
-  workoutCycle WorkoutCycle? @relation(fields: [workoutCycleId], references: [id])
+  workoutProgram WorkoutProgram? @relation(fields: [workoutProgramId], references: [id])
 }
 
-model WorkoutCycle {
+model WorkoutProgram {
   id          Int      @id @default(autoincrement())
   userId      Int
   title       String
@@ -102,8 +102,8 @@ model Exercise {
 
   noteId        Int? @unique
   note          Notes? @relation(fields: [noteId], references: [id])
-  workoutId     Int?
-  workout       Workout? @relation(fields: [workoutId], references: [id])
+  workoutId     Int
+  workout       Workout @relation(fields: [workoutId], references: [id])
 }
 
 // Schema for a Revoked Token
