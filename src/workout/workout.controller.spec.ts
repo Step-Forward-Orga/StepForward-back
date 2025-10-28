@@ -12,6 +12,7 @@ import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
 import { JwtType } from '../authentication/enums/JwtType.enum';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { create } from 'domain';
 
 describe('WorkoutController', () => {
   let controller: WorkoutController;
@@ -19,6 +20,7 @@ describe('WorkoutController', () => {
 
   const mockWorkoutService = {
     create: jest.fn(),
+    create_linked: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
@@ -39,6 +41,7 @@ describe('WorkoutController', () => {
             workout: {
               findUnique: jest.fn(),
               create: jest.fn(),
+              created: jest.fn(),
               update: jest.fn(),
               delete: jest.fn(),
             },
@@ -97,6 +100,41 @@ describe('WorkoutController', () => {
       expect(handleErrorsSpy).toThrow(error);
     });
   });
+
+  it ('should call workout.controller.create_linked and succeed' , async () => {
+    const dto: CreateWorkoutDto = { title: 'Upper 1', description: "First upper of the week"};
+    const user : JwtPayload = { sub: 1,
+      exp: Date.now() + 1000 * 60 * 60, // 1 hour in the future
+      jti: 'test-jti',
+      iat: Date.now(),
+      type: JwtType.ACCESS
+    };
+    const result = { id: 1, title: "Upper 1", description: "First upper of the week", linkedWorkouts: [1, 2] };
+    mockWorkoutService.create_linked.mockResolvedValue(result);
+
+    expect(await controller.create_linked(user, dto, "1")).toEqual(result);
+    expect(mockWorkoutService.create_linked).toHaveBeenCalledWith(user.sub, dto, 1);
+  });
+
+  it('should call workout.controller.create_linked and fail', async () => {
+    const dto: CreateWorkoutDto = { title: 'Upper 1', description: null };
+    const user: JwtPayload = {
+      sub: 1,
+      exp: Date.now() + 1000 * 60 * 60,
+      jti: 'test-jti',
+      iat: Date.now(),
+      type: JwtType.ACCESS,
+    };
+    const error = new InternalServerErrorException("Internal Server Error");
+    mockWorkoutService.create_linked.mockRejectedValueOnce(error);
+
+    const handleErrorsSpy = jest.spyOn(require('../utils/handle-errors'), 'handleErrors');
+    try {
+      await controller.create_linked(user, dto, "1");
+    } catch {}
+    expect(handleErrorsSpy).toHaveBeenCalledWith(error);
+  });
+
 
   describe('findAll', () => {
     it('should call workout.controller.findAll and return all workouts', async () => {

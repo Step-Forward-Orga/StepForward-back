@@ -28,6 +28,37 @@ describe('WorkoutService - create', () => {
     prisma = module.get<PrismaService>(PrismaService);
   });
 
+  it('should create a workout without linking a workoutProgram when id is not provided', async () => {
+  const userId = 1;
+  const CreateWorkoutDto: CreateWorkoutDto = {
+    title: 'My Solo Plan',
+    description: 'No program attached',
+  };
+
+  const mockWorkout = {
+    id: 2,
+    userId,
+    title: CreateWorkoutDto.title,
+    description: CreateWorkoutDto.description,
+    user: { id: 1, username: 'john' },
+  };
+
+  mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout);
+
+  const result = await service.create_linked(userId, CreateWorkoutDto, undefined);
+
+  expect(prisma.workout.create).toHaveBeenCalledWith({
+    data: {
+      user: { connect: { id: userId } },
+      title: CreateWorkoutDto.title,
+      description: CreateWorkoutDto.description,
+      workoutProgram: undefined,
+    },
+  });
+
+  expect(result).toEqual(mockWorkout);
+});
+
   it('should successfully create a workout plan', async () => {
     const userId = 1;
     const CreateWorkoutDto: CreateWorkoutDto = {
