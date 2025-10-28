@@ -23,7 +23,14 @@ export class WorkoutProgramService {
       include: {
         workouts: {
           include: {
-            user: true,
+            user: {
+              select: { 
+                id: true,
+                username: true,
+                email: true,
+                roles: true
+              }
+            }
           }
         },
         user: true,

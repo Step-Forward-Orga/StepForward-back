@@ -3,9 +3,15 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {logger: ['log', 'error', 'warn', 'debug', 'verbose']});
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule, 
+    new ExpressAdapter(), {
+      logger: ['log', 'error', 'warn', 'debug', 'verbose']
+    }
+  );
 
   app.enableCors({
     credentials: true,

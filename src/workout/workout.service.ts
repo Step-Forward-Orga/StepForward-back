@@ -10,7 +10,7 @@ export class WorkoutService {
   constructor(
     private readonly prisma: PrismaService
   ) {}
-  async create(
+  async create_linked(
     userId: number,
     createWorkoutDto: CreateWorkoutDto,
     workoutProgramId: number
@@ -21,6 +21,19 @@ export class WorkoutService {
         description: createWorkoutDto.description,
         user: { connect: { id: userId } },
         workoutProgram: workoutProgramId ? { connect: { id: workoutProgramId } } : undefined,
+      },
+    });
+  }
+
+  async create(
+    userId: number,
+    createWorkoutDto: CreateWorkoutDto,
+  ) {
+    return await this.prisma.workout.create({
+      data: {
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        user: { connect: { id: userId } },
       },
     });
   }

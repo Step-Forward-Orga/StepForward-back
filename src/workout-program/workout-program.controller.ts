@@ -22,7 +22,7 @@ export class WorkoutProgramController {
   }
 
   @Get()
-  async findAll() {
+  async findAll() { //TODO: add query params for filtering by user, what information is needed, the deps, and pagination
     const workoutPrograms = await this.workoutProgramService.findAll();
     return workoutPrograms.map(program => new WorkoutProgramEntity(program));
   }
