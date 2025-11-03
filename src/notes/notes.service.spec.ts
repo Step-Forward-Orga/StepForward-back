@@ -58,6 +58,158 @@ describe('NotesService - create', () => {
     expect(result).toEqual(mockCreatedNote);
   });
 
+  it('should create a note linked to a workout when workoutId is provided', async () => {
+  // Arrange
+  const authorId = 1;
+  const dtoWithWorkout = {
+    title: 'Note with workout',
+    note: 'linked to workout',
+    workoutId: 42,
+  };
+
+  const mockCreated = {
+    id: 10,
+    title: dtoWithWorkout.title,
+    note: dtoWithWorkout.note,
+    userId: authorId,
+    workoutId: dtoWithWorkout.workoutId,
+  };
+
+  mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
+
+  // Act
+  const result = await service.create(authorId, dtoWithWorkout as any);
+
+  // Assert
+  expect(prisma.notes.create).toHaveBeenCalledWith({
+    data: {
+      title: dtoWithWorkout.title,
+      note: dtoWithWorkout.note,
+      user: { connect: { id: authorId } },
+      workout: { connect: { id: dtoWithWorkout.workoutId } },
+      workoutProgram: undefined,
+      exercise: undefined,
+    },
+  });
+
+  expect(result).toEqual(mockCreated);
+});
+
+it('should create a note linked to a workoutProgram when workoutProgramId is provided', async () => {
+  // Arrange
+  const authorId = 2;
+  const dtoWithProgram = {
+    title: 'Note with program',
+    note: 'linked to program',
+    workoutProgramId: 7,
+  };
+
+  const mockCreated = {
+    id: 11,
+    title: dtoWithProgram.title,
+    note: dtoWithProgram.note,
+    userId: authorId,
+    workoutProgramId: dtoWithProgram.workoutProgramId,
+  };
+
+  mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
+
+  // Act
+  const result = await service.create(authorId, dtoWithProgram as any);
+
+  // Assert
+  expect(prisma.notes.create).toHaveBeenCalledWith({
+    data: {
+      title: dtoWithProgram.title,
+      note: dtoWithProgram.note,
+      user: { connect: { id: authorId } },
+      workout: undefined,
+      workoutProgram: { connect: { id: dtoWithProgram.workoutProgramId } },
+      exercise: undefined,
+    },
+  });
+
+  expect(result).toEqual(mockCreated);
+});
+
+it('should create a note linked to an exercise when exerciseId is provided', async () => {
+  // Arrange
+  const authorId = 3;
+  const dtoWithExercise = {
+    title: 'Note with exercise',
+    note: 'linked to exercise',
+    exerciseId: 99,
+  };
+
+  const mockCreated = {
+    id: 12,
+    title: dtoWithExercise.title,
+    note: dtoWithExercise.note,
+    userId: authorId,
+    exerciseId: dtoWithExercise.exerciseId,
+  };
+
+  mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
+
+  // Act
+  const result = await service.create(authorId, dtoWithExercise as any);
+
+  // Assert
+  expect(prisma.notes.create).toHaveBeenCalledWith({
+    data: {
+      title: dtoWithExercise.title,
+      note: dtoWithExercise.note,
+      user: { connect: { id: authorId } },
+      workout: undefined,
+      workoutProgram: undefined,
+      exercise: { connect: { id: dtoWithExercise.exerciseId } },
+    },
+  });
+
+  expect(result).toEqual(mockCreated);
+});
+
+it('should create a note with multiple relations when multiple ids are provided', async () => {
+  // Arrange
+  const authorId = 4;
+  const dtoAll = {
+    title: 'Note full',
+    note: 'linked to workout, program and exercise',
+    workoutId: 101,
+    workoutProgramId: 202,
+    exerciseId: 303,
+  };
+
+  const mockCreated = {
+    id: 13,
+    title: dtoAll.title,
+    note: dtoAll.note,
+    userId: authorId,
+    workoutId: dtoAll.workoutId,
+    workoutProgramId: dtoAll.workoutProgramId,
+    exerciseId: dtoAll.exerciseId,
+  };
+
+  mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
+
+  // Act
+  const result = await service.create(authorId, dtoAll as any);
+
+  // Assert
+  expect(prisma.notes.create).toHaveBeenCalledWith({
+    data: {
+      title: dtoAll.title,
+      note: dtoAll.note,
+      user: { connect: { id: authorId } },
+      workout: { connect: { id: dtoAll.workoutId } },
+      workoutProgram: { connect: { id: dtoAll.workoutProgramId } },
+      exercise: { connect: { id: dtoAll.exerciseId } },
+    },
+  });
+
+  expect(result).toEqual(mockCreated);
+});
+
   it('should throw an error if note creation fails', async () => {
     // Arrange
     const authorId = 1;

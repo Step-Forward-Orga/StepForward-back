@@ -13,6 +13,7 @@ import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
 import { JwtType } from '../authentication/enums/JwtType.enum';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { create } from 'domain';
+import { WorkoutEntity } from './entities/workout.entity';
 
 describe('WorkoutController', () => {
   let controller: WorkoutController;
@@ -79,7 +80,7 @@ describe('WorkoutController', () => {
       const result = { id: 1, title: "Upper 1", description: "First upper of the week"};
       mockWorkoutService.create.mockResolvedValue(result);
 
-      expect(await controller.create(user, dto)).toEqual(result);
+      expect(await controller.create(user, dto)).toEqual(new WorkoutEntity(result));
       expect(mockWorkoutService.create).toHaveBeenCalledWith(user.sub, dto);
     });
 
@@ -112,7 +113,7 @@ describe('WorkoutController', () => {
     const result = { id: 1, title: "Upper 1", description: "First upper of the week", linkedWorkouts: [1, 2] };
     mockWorkoutService.create_linked.mockResolvedValue(result);
 
-    expect(await controller.create_linked(user, dto, "1")).toEqual(result);
+    expect(await controller.create_linked(user, dto, "1")).toEqual(new WorkoutEntity(result));
     expect(mockWorkoutService.create_linked).toHaveBeenCalledWith(user.sub, dto, 1);
   });
 
@@ -141,7 +142,7 @@ describe('WorkoutController', () => {
       const result = [{ id: 1, name: 'Leg Day' }];
       mockWorkoutService.findAll.mockResolvedValue(result);
 
-      expect(await controller.findAll()).toEqual(result);
+      expect(await controller.findAll()).toEqual(result.map((w) => new WorkoutEntity(w)));
     });
 
     it('should call workout.controller.findAll and fail', async () => {
@@ -163,7 +164,7 @@ describe('WorkoutController', () => {
       const result = { id: 1, name: 'Back Day' };
       mockWorkoutService.findOne.mockResolvedValue(result);
 
-      expect(await controller.findOne('1')).toEqual(result);
+      expect(await controller.findOne('1')).toEqual(new WorkoutEntity(result));
       expect(mockWorkoutService.findOne).toHaveBeenCalledWith(1);
     });
 
@@ -187,7 +188,7 @@ describe('WorkoutController', () => {
       const result = { id: 1, title: 'Updated Name', description: 'Updated first upper of the week' };
       mockWorkoutService.update.mockResolvedValue(result);
 
-      expect(await controller.update('1', dto)).toEqual(result);
+      expect(await controller.update('1', dto)).toEqual(new WorkoutEntity(result));
       expect(mockWorkoutService.update).toHaveBeenCalledWith(1, dto);
     });
 
@@ -211,7 +212,7 @@ describe('WorkoutController', () => {
       const result = { id: 1, deleted: true };
       mockWorkoutService.remove.mockResolvedValue(result);
 
-      expect(await controller.remove('1')).toEqual(result);
+      expect(await controller.remove('1')).toEqual(new WorkoutEntity(result));
       expect(mockWorkoutService.remove).toHaveBeenCalledWith(1);
     });
 
