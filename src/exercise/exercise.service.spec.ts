@@ -12,6 +12,7 @@ describe('ExerciseService - create', () => {
   const mockPrisma = {
     exercise: {
       create: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -71,6 +72,45 @@ describe('ExerciseService - create', () => {
     });
 
     expect(result).toEqual(createdExercise);
+  });
+
+  it('should mark exercise as completed with completed sets', async () => {
+    const completeDto = {
+      completed: true,
+      completedSets: [
+        { reps: 10, weight: 90, order: 1, type: 'COMPLETED' as const },
+        { reps: 8, weight: 95, order: 2, type: 'COMPLETED' as const },
+      ],
+    };
+
+    const updatedExercise = {
+      id: 1,
+      completed: true,
+      completedSets: completeDto.completedSets,
+      completedAt: expect.any(Date),
+    };
+
+    mockPrisma.exercise.update = jest.fn().mockResolvedValue(updatedExercise);
+
+    const result = await service.complete(1, completeDto);
+
+    expect(prisma.exercise.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: {
+        completed: completeDto.completed,
+        completedSets: {
+          create: completeDto.completedSets.map(set => ({
+            reps: set.reps,
+            weight: set.weight,
+            order: set.order,
+            type: set.type,
+          })),
+        },
+        completedAt: expect.any(Date),
+      },
+    });
+
+    expect(result).toEqual(updatedExercise);
   });
 
   it('should propagate an error if creation fails', async () => {
@@ -290,6 +330,40 @@ describe('ExerciseService - update', () => {
       where: { id: 1 },
       data: updateExerciseDto,
     });
+    expect(result).toEqual(updatedExercise);
+  });
+
+  it('should update exercise with plannedSets when provided', async () => {
+    const updateExerciseDto = {
+      plannedSets: [
+        { reps: 12, weight: 75, order: 1, type: 'PLANNED' as const },
+        { reps: 10, weight: 80, order: 2, type: 'PLANNED' as const },
+      ],
+    };
+
+    const updatedExercise = {
+      id: 1,
+      plannedSets: updateExerciseDto.plannedSets,
+    };
+
+    mockPrisma.exercise.update.mockResolvedValueOnce(updatedExercise);
+
+    const result = await service.update(1, updateExerciseDto);
+
+    expect(prisma.exercise.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: {
+        plannedSets: {
+          set: updateExerciseDto.plannedSets.map(set => ({
+            reps: set.reps,
+            weight: set.weight,
+            order: set.order,
+            type: set.type,
+          })),
+        },
+      },
+    });
+
     expect(result).toEqual(updatedExercise);
   });
 
