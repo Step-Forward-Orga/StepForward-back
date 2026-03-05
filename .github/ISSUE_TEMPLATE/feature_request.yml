@@ -1,6 +1,6 @@
 name: Feature Request
 description: File a feature request
-title: "[Feature]: "
+title: "feature: "
 labels: ["enhancement", "triage"]
 assignees:
   - Antweneee
