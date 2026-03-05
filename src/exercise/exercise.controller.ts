@@ -32,6 +32,7 @@ export class ExerciseController {
 
       // return exercises;
       //TODO: fix the line below, problem with the entities declarations
+      // return exercises.map((exercise) => new ExerciseEntity(exercise));
       return exercises.map((exercise) => new ExerciseEntity(exercise));
     } catch (error: unknown) {
       handleErrors(error);
