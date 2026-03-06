@@ -39,8 +39,8 @@ model Notes {
   workout   Workout?
   workoutProgramId Int?
   workoutProgram WorkoutProgram?
-  exerciseId Int?
-  exercise  Exercise?
+  workoutExerciseId Int?
+  workoutExercise  WorkoutExercise?
   user      User @relation(fields: [userId], references: [id])
 }
 
@@ -56,7 +56,7 @@ model Workout {
 
   note  Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
-  exercises   Exercise[]
+  workoutExercises   WorkoutExercise[]
   workoutProgram WorkoutProgram? @relation(fields: [workoutProgramId], references: [id])
 }
 
@@ -82,21 +82,31 @@ model Set {
   type       SetType // PLANNED or COMPLETED
 
   plannedForId Int?
-  plannedFor   Exercise? @relation("PlannedSets", fields: [plannedForId], references: [id])
+  plannedFor   WorkoutExercise? @relation("PlannedSets", fields: [plannedForId], references: [id])
   completedForId Int?
-  completedFor Exercise? @relation("CompletedSets", fields: [completedForId], references: [id])
+  completedFor WorkoutExercise? @relation("CompletedSets", fields: [completedForId], references: [id])
 }
 
 // Schema for a Exercise
 model Exercise {
+  id                Int      @id @default(autoincrement())
+  name              String
+  description       String
+
+  workoutExercises  WorkoutExercise[]
+}
+
+model WorkoutExercise {
   id            Int      @id @default(autoincrement())
-  exerciseName  String
-  //! exerciseId    String In the future were the exercise dataset will be used
+
+  exerciseId    Int
+  exercise      Exercise @relation(fields: [exerciseId], references: [id])
+
   plannedSets   Set[] @relation("PlannedSets")
   restTime      String?
 
-  completedSets Set[] @relation("CompletedSets")
   completed     Boolean @default(false)
+  completedSets Set[] @relation("CompletedSets")
   completedAt   DateTime?
   createdAt     DateTime @default(now())
 
