@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { WorkoutExerciseService } from './workout-exercise.service';
 import { CreateWorkoutExerciseDto } from './dto/create-workout-exercise.dto';
 import { UpdateWorkoutExerciseDto } from './dto/update-workout-exercise.dto';
-import { handleErrors } from 'src/utils/handle-errors';
+import { handleErrors } from '../utils/handle-errors';
 import { WorkoutExerciseEntity } from './entities/workout-exercise.entity';
 import { CompleteWorkoutExerciseDto } from './dto/complete-workout-exercise.dto';
-import { AuthGuard } from 'src/authentication/authentication.guard';
+import { AuthGuard } from '../authentication/authentication.guard';
 
 @Controller('workout-exercise')
 @UseGuards(AuthGuard)

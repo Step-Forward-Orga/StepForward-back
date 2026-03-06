@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { ExerciseEntity } from "src/exercise/entities/exercise.entity";
+import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
 import { SetEntity } from "./set.entity";
-import { NotesEntity } from "src/notes/entities/notes.entity";
-import { WorkoutEntity } from "src/workout/entities/workout.entity";
+import { NotesEntity } from "../../notes/entities/notes.entity";
+import { WorkoutEntity } from "../../workout/entities/workout.entity";
 
 export class WorkoutExerciseEntity {
     @ApiProperty({ example: 1 })

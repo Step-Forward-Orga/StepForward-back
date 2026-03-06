@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateWorkoutExerciseDto } from './dto/create-workout-exercise.dto';
 import { UpdateWorkoutExerciseDto } from './dto/update-workout-exercise.dto';
 import  { CompleteWorkoutExerciseDto } from './dto/complete-workout-exercise.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WorkoutExerciseService {
