@@ -20,5 +20,5 @@ export class CreateNotesDto {
 
     @IsNumber()
     @IsOptional()
-    exerciseId?: number;   
+    workoutExerciseId?: number;   
 }
