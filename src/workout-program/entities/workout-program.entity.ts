@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Notes } from "@prisma/client";
 import { NotesEntity } from "../../notes/entities/notes.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { WorkoutEntity } from "../../workout/entities/workout.entity";
