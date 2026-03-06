@@ -6,7 +6,6 @@ import { handleErrors } from '../utils/handle-errors';
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
-import { CompleteExerciseDto } from './dto/complete-exercise.dto';
 import { ExerciseEntity } from './entities/exercise.entity';
 
 @Controller('Exercise')
@@ -33,7 +32,7 @@ export class ExerciseController {
       // return exercises;
       //TODO: fix the line below, problem with the entities declarations
       // return exercises.map((exercise) => new ExerciseEntity(exercise));
-      return exercises.map((exercise) => new ExerciseEntity(exercise));
+      return exercises
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -53,16 +52,6 @@ export class ExerciseController {
   async update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     try {
       const exercise =  await this.ExerciseService.update(+id, updateExerciseDto);
-      return new ExerciseEntity(exercise);
-    } catch (error: unknown) {
-      handleErrors(error);
-    }
-  }
-
-  @Patch(':id/complete')
-  async complete(@Param('id') id: string, @Body() completeExerciseDto: CompleteExerciseDto) {
-    try {
-      const exercise = await this.ExerciseService.complete(+id, completeExerciseDto);
       return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
