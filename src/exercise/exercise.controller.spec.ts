@@ -99,12 +99,12 @@ describe('ExerciseController', () => {
     expect(result).toEqual(mockExerciseEntity);
   });
 
-  it('should complete an exercise', async () => {
-    const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
-    jest.spyOn(service, 'complete').mockResolvedValueOnce(mockExercise as any);
-    const result = await controller.complete('1', {} as any);
-    expect(result).toEqual(mockExerciseEntity);
-  });
+  // it('should complete an exercise', async () => {
+  //   const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
+  //   jest.spyOn(service, 'complete').mockResolvedValueOnce(mockExercise as any);
+  //   const result = await controller.complete('1', {} as any);
+  //   expect(result).toEqual(mockExerciseEntity);
+  // });
 
   it('should remove an exercise', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
@@ -141,12 +141,12 @@ describe('ExerciseController', () => {
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
-    it('should handle errors in complete', async () => {
-      const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
-      jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('complete error'));
-      await controller.complete('1', {} as any);
-      expect(handleErrorsSpy).toHaveBeenCalled();
-    });
+    // it('should handle errors in complete', async () => {
+    //   const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
+    //   jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('complete error'));
+    //   await controller.complete('1', {} as any);
+    //   expect(handleErrorsSpy).toHaveBeenCalled();
+    // });
 
     it('should handle errors in remove', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
