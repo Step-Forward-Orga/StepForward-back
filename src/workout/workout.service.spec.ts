@@ -13,6 +13,7 @@ describe('WorkoutService - create', () => {
   const mockPrisma = {
     workout: {
       create: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -26,93 +27,136 @@ describe('WorkoutService - create', () => {
 
     service = module.get<WorkoutService>(WorkoutService);
     prisma = module.get<PrismaService>(PrismaService);
+    jest.clearAllMocks();
   });
 
   it('should create a workout without linking a workoutProgram when id is not provided', async () => {
-  const userId = 1;
-  const CreateWorkoutDto: CreateWorkoutDto = {
-    title: 'My Solo Plan',
-    description: 'No program attached',
-  };
+    const userId = 1;
+    const createWorkoutDto: CreateWorkoutDto = {
+      title: 'My Solo Plan',
+      description: 'No program attached',
+    };
 
-  const mockWorkout = {
-    id: 2,
-    userId,
-    title: CreateWorkoutDto.title,
-    description: CreateWorkoutDto.description,
-    user: { id: 1, username: 'john' },
-  };
+    const createdWorkout = {
+      id: 2,
+      userId,
+      title: createWorkoutDto.title,
+      description: createWorkoutDto.description,
+      code: '',
+      user: { id: 1, username: 'john' },
+    };
 
-  mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout);
+    const updatedWorkout = {
+      ...createdWorkout,
+      code: 'my-solo-plan-2',
+    };
 
-  const result = await service.create_linked(userId, CreateWorkoutDto, undefined);
+    mockPrisma.workout.create.mockResolvedValueOnce(createdWorkout);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
 
-  expect(prisma.workout.create).toHaveBeenCalledWith({
-    data: {
-      user: { connect: { id: userId } },
-      title: CreateWorkoutDto.title,
-      description: CreateWorkoutDto.description,
-      workoutProgram: undefined,
-    },
+    const result = await service.create_linked(userId, createWorkoutDto, undefined as any);
+
+    expect(prisma.workout.create).toHaveBeenCalledWith({
+      data: {
+        user: { connect: { id: userId } },
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        code: '',
+        workoutProgram: undefined,
+      },
+    });
+
+    expect(prisma.workout.update).toHaveBeenCalledWith({
+      where: { id: createdWorkout.id },
+      data: { code: 'my-solo-plan-2' },
+    });
+
+    expect(result).toEqual(updatedWorkout);
   });
-
-  expect(result).toEqual(mockWorkout);
-});
 
   it('should successfully create a workout plan', async () => {
     const userId = 1;
-    const CreateWorkoutDto: CreateWorkoutDto = {
+    const createWorkoutDto: CreateWorkoutDto = {
       title: 'My First Plan',
       description: 'A great workout plan',
     };
 
-    let mockWorkout_linked = {
+    const createdWorkoutLinked = {
       id: 1,
       userId: 1,
       title: 'My First Plan',
       description: 'A great workout plan',
-      user: { id: 1, username: 'john' }, // simplified user
-      workoutProgram: { id: 1, name: 'Upper Split' }, // if needed
+      code: '',
+      user: { id: 1, username: 'john' },
+      workoutProgram: { id: 1, name: 'Upper Split' },
     };
 
-    // test create with workoutProgram
-    mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout_linked);
+    const updatedWorkoutLinked = {
+      ...createdWorkoutLinked,
+      code: 'my-first-plan-1',
+    };
 
-    // Act
-    const result_linked = await service.create_linked(userId, CreateWorkoutDto, 1);
+    mockPrisma.workout.create.mockResolvedValueOnce(createdWorkoutLinked);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkoutLinked);
 
-    // Assert
+    const resultLinked = await service.create_linked(userId, createWorkoutDto, 1);
+
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         user: { connect: { id: userId } },
-        title: CreateWorkoutDto.title,
-        description: CreateWorkoutDto.description,
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        code: '',
         workoutProgram: { connect: { id: 1 } },
       },
     });
-    expect(result_linked).toEqual(mockWorkout_linked);
 
-    // modify object to test create without workoutProgram
-    delete mockWorkout_linked.workoutProgram
+    expect(prisma.workout.update).toHaveBeenCalledWith({
+      where: { id: createdWorkoutLinked.id },
+      data: { code: 'my-first-plan-1' },
+    });
 
-    mockPrisma.workout.create.mockResolvedValueOnce(mockWorkout_linked); // ← this is the missing part
-    const result = await service.create(userId, CreateWorkoutDto);
+    expect(resultLinked).toEqual(updatedWorkoutLinked);
+
+    const createdWorkout = {
+      id: 3,
+      userId: 1,
+      title: 'My First Plan',
+      description: 'A great workout plan',
+      code: '',
+      user: { id: 1, username: 'john' },
+    };
+
+    const updatedWorkout = {
+      ...createdWorkout,
+      code: 'my-first-plan-3',
+    };
+
+    mockPrisma.workout.create.mockResolvedValueOnce(createdWorkout);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
+
+    const result = await service.create(userId, createWorkoutDto);
 
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         user: { connect: { id: userId } },
-        title: CreateWorkoutDto.title,
-        description: CreateWorkoutDto.description,
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        code: '',
       },
     });
 
-    expect(result).toEqual(mockWorkout_linked);
+    expect(prisma.workout.update).toHaveBeenCalledWith({
+      where: { id: createdWorkout.id },
+      data: { code: 'my-first-plan-3' },
+    });
+
+    expect(result).toEqual(updatedWorkout);
   });
 
   it('should propagate an error if creation fails', async () => {
-    // Arrange
     const userId = 1;
-    const CreateWorkoutDto: CreateWorkoutDto = {
+    const createWorkoutDto: CreateWorkoutDto = {
       title: 'Fail Plan',
       description: 'This will fail',
     };
@@ -121,32 +165,94 @@ describe('WorkoutService - create', () => {
 
     mockPrisma.workout.create.mockRejectedValueOnce(mockError);
 
-    // Act & Assert
-    await expect(service.create_linked(userId, CreateWorkoutDto, 1)).rejects.toThrow(
-      'Database error',
-    );
+    await expect(service.create_linked(userId, createWorkoutDto, 1)).rejects.toThrow('Database error');
 
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         user: { connect: { id: userId } },
-        title: CreateWorkoutDto.title,
-        description: CreateWorkoutDto.description,
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        code: '',
         workoutProgram: { connect: { id: 1 } },
       },
     });
 
     mockPrisma.workout.create.mockRejectedValueOnce(mockError);
 
-    await expect(service.create(userId, CreateWorkoutDto)).rejects.toThrow(
-      'Database error',
-    );
+    await expect(service.create(userId, createWorkoutDto)).rejects.toThrow('Database error');
+
     expect(prisma.workout.create).toHaveBeenCalledWith({
       data: {
         user: { connect: { id: userId } },
-        title: CreateWorkoutDto.title,
-        description: CreateWorkoutDto.description,
+        title: createWorkoutDto.title,
+        description: createWorkoutDto.description,
+        code: '',
       },
     });
+  });
+
+  it('should generate a slug-based code when creating a standalone workout', async () => {
+    const userId = 1;
+    const createWorkoutDto: CreateWorkoutDto = {
+      title: 'Upper 1',
+      description: 'Standalone workout',
+    };
+
+    const createdWorkout = {
+      id: 12,
+      userId,
+      title: createWorkoutDto.title,
+      description: createWorkoutDto.description,
+      code: '',
+    };
+
+    const updatedWorkout = {
+      ...createdWorkout,
+      code: 'upper-1-12',
+    };
+
+    mockPrisma.workout.create.mockResolvedValueOnce(createdWorkout);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
+
+    const result = await service.create(userId, createWorkoutDto);
+
+    expect(prisma.workout.update).toHaveBeenCalledWith({
+      where: { id: 12 },
+      data: { code: 'upper-1-12' },
+    });
+    expect(result).toEqual(updatedWorkout);
+  });
+
+  it('should generate a fallback code when title slug is empty', async () => {
+    const userId = 1;
+    const createWorkoutDto: CreateWorkoutDto = {
+      title: '!!!',
+      description: 'No valid slug characters',
+    };
+
+    const createdWorkout = {
+      id: 7,
+      userId,
+      title: createWorkoutDto.title,
+      description: createWorkoutDto.description,
+      code: '',
+    };
+
+    const updatedWorkout = {
+      ...createdWorkout,
+      code: 'workout-7',
+    };
+
+    mockPrisma.workout.create.mockResolvedValueOnce(createdWorkout);
+    mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
+
+    const result = await service.create(userId, createWorkoutDto);
+
+    expect(prisma.workout.update).toHaveBeenCalledWith({
+      where: { id: 7 },
+      data: { code: 'workout-7' },
+    });
+    expect(result).toEqual(updatedWorkout);
   });
 });
 

@@ -36,6 +36,7 @@ CREATE TABLE "Workout" (
     "userId" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL DEFAULT '',
+    "code" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "noteId" INTEGER,
     "workoutProgramId" INTEGER,
@@ -108,10 +109,16 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Workout_code_key" ON "Workout"("code");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Workout_noteId_key" ON "Workout"("noteId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WorkoutProgram_noteId_key" ON "WorkoutProgram"("noteId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Exercise_name_key" ON "Exercise"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WorkoutExercise_noteId_key" ON "WorkoutExercise"("noteId");
