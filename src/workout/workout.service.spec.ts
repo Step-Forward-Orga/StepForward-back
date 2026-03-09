@@ -180,13 +180,13 @@ describe('WorkoutService - findAll', () => {
         id: 1,
         title: 'Plan 1',
         description: 'First plan',
-        exercises: [{ id: 1, name: 'Exercise 1' }],
+        workoutExercises: [{ id: 1, name: 'Exercise 1', description: 'desc 1' }],
       },
       {
         id: 2,
         title: 'Plan 2',
         description: 'Second plan',
-        exercises: [{ id: 2, name: 'Exercise 2' }],
+        workoutExercises: [{ id: 2, name: 'Exercise 2', description: 'desc 2' }],
       },
     ];
 
@@ -197,7 +197,7 @@ describe('WorkoutService - findAll', () => {
 
     // Assert
     expect(prisma.workout.findMany).toHaveBeenCalledWith({
-      include: { exercises: true },
+      include: { workoutExercises: true },
     });
 
     expect(result).toEqual(mockWorkouts);
@@ -213,7 +213,7 @@ describe('WorkoutService - findAll', () => {
     await expect(service.findAll()).rejects.toThrow('Database error');
 
     expect(prisma.workout.findMany).toHaveBeenCalledWith({
-      include: { exercises: true },
+      include: { workoutExercises: true },
     });
   });
 });
@@ -248,9 +248,9 @@ describe('WorkoutService - findOne', () => {
       id: 1,
       title: 'Plan 1',
       description: 'A great workout plan',
-      exercises: [
-        { id: 1, name: 'Exercise 1' },
-        { id: 2, name: 'Exercise 2' },
+      workoutExercises: [
+        { id: 1, name: 'Exercise 1', description: 'desc 1' },
+        { id: 2, name: 'Exercise 2', description: 'desc 2' }
       ],
     };
 
@@ -262,7 +262,7 @@ describe('WorkoutService - findOne', () => {
     // Assert
     expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
-      include: { exercises: true },
+      include: { workoutExercises: true },
     });
     expect(result).toEqual(mockWorkout);
   });
@@ -279,7 +279,7 @@ describe('WorkoutService - findOne', () => {
 
     expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
-      include: { exercises: true },
+      include: { workoutExercises: true },
     });
   });
 
@@ -295,7 +295,7 @@ describe('WorkoutService - findOne', () => {
 
     expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id },
-      include: { exercises: true },
+      include: { workoutExercises: true },
     });
   });
 });

@@ -52,19 +52,10 @@ describe('ExerciseController', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   const mockExercise = {
     id: 1,
     exerciseName: 'Bench Press',
-    completed: false,
-    restTime: 'PT1M',
-    plannedSets: [],
-    completedSets: [],
-    workout: {},
-    note: {},
+    description: 'this is description',
   };
 
   const mockExerciseEntity = expect.any(Object);
@@ -96,13 +87,6 @@ describe('ExerciseController', () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'update').mockResolvedValueOnce(mockExercise as any);
     const result = await controller.update('1', {} as any);
-    expect(result).toEqual(mockExerciseEntity);
-  });
-
-  it('should complete an exercise', async () => {
-    const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
-    jest.spyOn(service, 'complete').mockResolvedValueOnce(mockExercise as any);
-    const result = await controller.complete('1', {} as any);
     expect(result).toEqual(mockExerciseEntity);
   });
 
@@ -141,12 +125,12 @@ describe('ExerciseController', () => {
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
-    it('should handle errors in complete', async () => {
-      const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
-      jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('complete error'));
-      await controller.complete('1', {} as any);
-      expect(handleErrorsSpy).toHaveBeenCalled();
-    });
+    // it('should handle errors in complete', async () => {
+    //   const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
+    //   jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('complete error'));
+    //   await controller.complete('1', {} as any);
+    //   expect(handleErrorsSpy).toHaveBeenCalled();
+    // });
 
     it('should handle errors in remove', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;

@@ -23,7 +23,7 @@ export class NotesService {
         user: { connect: { id: authorId } },
         workout: createNotesDto.workoutId ? { connect: { id: createNotesDto.workoutId } } : undefined,
         workoutProgram: createNotesDto.workoutProgramId ? { connect: { id: createNotesDto.workoutProgramId } } : undefined,
-        exercise: createNotesDto.exerciseId ? { connect: { id: createNotesDto.exerciseId } } : undefined,
+        workoutExercise: createNotesDto.workoutExerciseId ? { connect: { id: createNotesDto.workoutExerciseId } } : undefined,
       },
     })
   }

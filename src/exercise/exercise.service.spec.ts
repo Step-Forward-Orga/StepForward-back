@@ -30,23 +30,14 @@ describe('ExerciseService - create', () => {
 
   it('should successfully create a new exercise', async () => {
     const createExerciseDto: CreateExerciseDto = {
-      exerciseName: 'Bench Press',
-      restTime: 'PT1M30S',
-      workoutId: 1,
-      plannedSets: [
-        { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
-        { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
-      ],
-      completed: false,
+      name: 'Bench Press',
+      description: 'this is description',
     };
 
     const createdExercise = {
       id: 1,
-      exerciseName: createExerciseDto.exerciseName,
-      restTime: createExerciseDto.restTime,
-      workoutId: createExerciseDto.workoutId,
-      plannedSets: createExerciseDto.plannedSets,
-      completed: false,
+      name: createExerciseDto.name,
+      description: createExerciseDto.description,
     };
 
     mockPrisma.exercise.create.mockResolvedValueOnce(createdExercise);
@@ -55,75 +46,44 @@ describe('ExerciseService - create', () => {
 
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
-        exerciseName: createExerciseDto.exerciseName,
-        restTime: createExerciseDto.restTime,
-        completed: false,
-        workoutId: createExerciseDto.workoutId,
-        plannedSets: {
-          create: [
-            { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
-            { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
-          ],
-        },
-      },
-      include: {
-        plannedSets: true,
+        name: createExerciseDto.name,
+        description: createExerciseDto.description,
       },
     });
 
     expect(result).toEqual(createdExercise);
   });
 
-  it('should mark exercise as completed with completed sets', async () => {
-    const completeDto = {
-      completed: true,
-      completedSets: [
-        { reps: 10, weight: 90, order: 1, type: 'COMPLETED' as const },
-        { reps: 8, weight: 95, order: 2, type: 'COMPLETED' as const },
-      ],
+  it ('should create an exercise without description', async () => {
+    const createExerciseDto: CreateExerciseDto = {
+      name: 'Bench Press',
     };
 
-    const updatedExercise = {
+    const createdExercise = {
       id: 1,
-      completed: true,
-      completedSets: completeDto.completedSets,
-      completedAt: expect.any(Date),
+      name: createExerciseDto.name,
+      description: "",
     };
 
-    mockPrisma.exercise.update = jest.fn().mockResolvedValue(updatedExercise);
+    mockPrisma.exercise.create.mockResolvedValueOnce(createdExercise);
 
-    const result = await service.complete(1, completeDto);
+    const result = await service.create(createExerciseDto);
 
-    expect(prisma.exercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+    expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
-        completed: completeDto.completed,
-        completedSets: {
-          create: completeDto.completedSets.map(set => ({
-            reps: set.reps,
-            weight: set.weight,
-            order: set.order,
-            type: set.type,
-          })),
-        },
-        completedAt: expect.any(Date),
+        name: createExerciseDto.name,
+        description: "",
       },
     });
 
-    expect(result).toEqual(updatedExercise);
-  });
+    expect(result).toEqual(createdExercise);
+  })
 
   it('should propagate an error if creation fails', async () => {
     // Arrange
     const createExerciseDto: CreateExerciseDto = {
-      exerciseName: 'Bench Press',
-      restTime: 'PT1M30S',
-      workoutId: 1,
-      plannedSets: [
-        { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
-        { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
-      ],
-      completed: false,
+      name: 'Bench Press',
+      description: 'this is description',
     };
 
     const mockError = new Error('Database connection failed');
@@ -136,18 +96,9 @@ describe('ExerciseService - create', () => {
     );
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
-        exerciseName: createExerciseDto.exerciseName,
-        restTime: createExerciseDto.restTime,
-        completed: false,
-        workoutId: createExerciseDto.workoutId,
-        plannedSets: {
-          create: [
-            { reps: 10, weight: 80, order: 1, type: 'PLANNED' },
-            { reps: 8, weight: 85, order: 2, type: 'PLANNED' },
-          ],
-        },
+        name: createExerciseDto.name,
+        description: createExerciseDto.description,
       },
-      include: { plannedSets: true },
     });
   });
 });
@@ -179,23 +130,13 @@ describe('ExerciseService - findAll', () => {
     const mockExercises = [
       {
         id: 1,
-        exerciseName: 'Bench Press',
-        exerciseId: 'ex-123',
-        sets: 4,
-        reps: 10,
-        weight: 80,
-        restTime: 'PT1M30S',
-        planId: 1,
+        name: 'Bench Press',
+        description: 'this is description'
       },
       {
         id: 2,
-        exerciseName: 'Deadlift',
-        exerciseId: 'ex-456',
-        sets: 3,
-        reps: 8,
-        weight: 100,
-        restTime: 'PT2M',
-        planId: 1,
+        name: 'Deadlift',
+        description: 'this is description',
       },
     ];
 
@@ -246,13 +187,8 @@ describe('ExerciseService - findOne', () => {
     // Arrange
     const mockExercise = {
       id: 1,
-      exerciseName: 'Bench Press',
-      exerciseId: 'ex-123',
-      sets: 4,
-      reps: 10,
-      weight: 80,
-      restTime: 'PT1M30S',
-      planId: 1,
+      name: 'Bench Press',
+      description: 'description',
     };
 
     mockPrisma.exercise.findUniqueOrThrow.mockResolvedValueOnce(mockExercise);
@@ -305,19 +241,14 @@ describe('ExerciseService - update', () => {
   it('should successfully update an exercise', async () => {
     // Arrange
     const updateExerciseDto = {
-      exerciseName: 'Updated Bench Press',
-      sets: 5,
-      reps: 12,
+      name: 'Updated Bench Press',
+      description: 'updated this is description',
     };
 
     const updatedExercise = {
       id: 1,
-      exerciseName: 'Updated Bench Press',
-      sets: 5,
-      reps: 12,
-      weight: 80,
-      restTime: 'PT1M30S',
-      planId: 1,
+      name: 'Updated Bench Press',
+      description: 'updated this is description',
     };
 
     mockPrisma.exercise.update.mockResolvedValueOnce(updatedExercise);
@@ -333,44 +264,10 @@ describe('ExerciseService - update', () => {
     expect(result).toEqual(updatedExercise);
   });
 
-  it('should update exercise with plannedSets when provided', async () => {
-    const updateExerciseDto = {
-      plannedSets: [
-        { reps: 12, weight: 75, order: 1, type: 'PLANNED' as const },
-        { reps: 10, weight: 80, order: 2, type: 'PLANNED' as const },
-      ],
-    };
-
-    const updatedExercise = {
-      id: 1,
-      plannedSets: updateExerciseDto.plannedSets,
-    };
-
-    mockPrisma.exercise.update.mockResolvedValueOnce(updatedExercise);
-
-    const result = await service.update(1, updateExerciseDto);
-
-    expect(prisma.exercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: {
-        plannedSets: {
-          set: updateExerciseDto.plannedSets.map(set => ({
-            reps: set.reps,
-            weight: set.weight,
-            order: set.order,
-            type: set.type,
-          })),
-        },
-      },
-    });
-
-    expect(result).toEqual(updatedExercise);
-  });
-
   it('should throw an error if the exercise to update is not found', async () => {
     // Arrange
     const updateExerciseDto = {
-      exerciseName: 'Non-existent Exercise',
+      name: 'Non-existent Exercise',
     };
 
     const mockError = new Error('Exercise not found');
@@ -390,7 +287,7 @@ describe('ExerciseService - update', () => {
   it('should propagate an error if update fails', async () => {
     // Arrange
     const updateExerciseDto = {
-      exerciseName: 'Error Test',
+      name: 'Error Test',
     };
 
     const mockError = new Error('Database error');
@@ -434,13 +331,8 @@ describe('ExerciseService - remove', () => {
     // Arrange
     const mockDeletedExercise = {
       id: 1,
-      exerciseName: 'Bench Press',
-      exerciseId: 'ex-123',
-      sets: 4,
-      reps: 10,
-      weight: 80,
-      restTime: 'PT1M30S',
-      planId: 1,
+      name: 'Bench Press',
+      description: 'this is description',
     };
 
     mockPrisma.exercise.delete.mockResolvedValueOnce(mockDeletedExercise);

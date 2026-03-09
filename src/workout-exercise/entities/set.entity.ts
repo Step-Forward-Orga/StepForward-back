@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ExerciseEntity } from "./exercise.entity";
+import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
 import { Type } from "class-transformer";
 
 export class SetEntity {

@@ -67,7 +67,7 @@ describe('NotesController', () => {
         createdAt: new Date(),
         workoutId: null,
         workoutProgramId: null,
-        exerciseId: null,
+        workoutExerciseId: null,
       };
 
       const mockNotesService = module.get<NotesService>(NotesService);

@@ -7,6 +7,11 @@ import { InvalidCredentials } from '../errors/InvalidCredentials';
 
 import { UserService } from './user.service';
 
+jest.mock('bcrypt', () => ({
+    hash: jest.fn(),
+    compare: jest.fn(),
+  }));
+
 describe('UserService - updatePassword', () => {
   let service: UserService;
   let prismaService: PrismaService;
@@ -31,6 +36,7 @@ describe('UserService - updatePassword', () => {
 
     service = module.get<UserService>(UserService);
     prismaService = module.get<PrismaService>(PrismaService);
+    jest.clearAllMocks();
   });
 
 it('should successfully update the password', async () => {
@@ -48,8 +54,8 @@ it('should successfully update the password', async () => {
 
   prismaService.user.findUniqueOrThrow = jest.fn().mockResolvedValueOnce(mockUser);
   prismaService.user.update = updateSpy;
-  jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true); // Old password matches
-  jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce(hashedPassword);
+  (bcrypt.compare as unknown as jest.Mock).mockResolvedValueOnce(true); // Old password matches
+  (bcrypt.hash as unknown as jest.Mock).mockResolvedValueOnce(hashedPassword);
 
   // Act
   await service.updatePassword(userId, oldPassword, newPassword, newPassword);
@@ -91,7 +97,7 @@ it('should successfully update the password', async () => {
     };
 
     prismaService.user.findUniqueOrThrow = jest.fn().mockResolvedValueOnce(mockUser);
-    jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false); // Old password does not match
+    (bcrypt.compare as unknown as jest.Mock).mockResolvedValueOnce(false); // Old password does not match
 
     // Act & Assert
     await expect(

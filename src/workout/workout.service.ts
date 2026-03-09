@@ -33,7 +33,7 @@ export class WorkoutService {
       data: {
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
-        user: { connect: { id: userId } },
+        user: { connect: { id: userId } }
       },
     });
   }
@@ -41,7 +41,7 @@ export class WorkoutService {
   async findAll() {
     return await this.prisma.workout.findMany({
       include: {
-        exercises: true,
+        workoutExercises: true,
       },
     });
   }
@@ -50,7 +50,7 @@ export class WorkoutService {
     return await this.prisma.workout.findUniqueOrThrow({
       where: { id },
       include: {
-        exercises: true,
+        workoutExercises: true,
       },
     })
   }

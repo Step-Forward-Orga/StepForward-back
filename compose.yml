@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
-    command: ["sh", "-c", "/wait-for.sh db && npx prisma migrate deploy && (npm run start:dev & npm run studio)"]
+    command: ["sh", "-c", "/wait-for.sh db && npx prisma migrate deploy && npm run populate-db && (npm run start:dev & npm run studio)"]
     environment:
       - NODE_ENV=dev
       - PORT=${PORT}

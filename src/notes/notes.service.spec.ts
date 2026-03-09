@@ -88,7 +88,7 @@ describe('NotesService - create', () => {
       user: { connect: { id: authorId } },
       workout: { connect: { id: dtoWithWorkout.workoutId } },
       workoutProgram: undefined,
-      exercise: undefined,
+      workoutExercise: undefined,
     },
   });
 
@@ -125,7 +125,7 @@ it('should create a note linked to a workoutProgram when workoutProgramId is pro
       user: { connect: { id: authorId } },
       workout: undefined,
       workoutProgram: { connect: { id: dtoWithProgram.workoutProgramId } },
-      exercise: undefined,
+      workoutExercise: undefined,
     },
   });
 
@@ -138,7 +138,7 @@ it('should create a note linked to an exercise when exerciseId is provided', asy
   const dtoWithExercise = {
     title: 'Note with exercise',
     note: 'linked to exercise',
-    exerciseId: 99,
+    workoutExerciseId: 99,
   };
 
   const mockCreated = {
@@ -146,7 +146,7 @@ it('should create a note linked to an exercise when exerciseId is provided', asy
     title: dtoWithExercise.title,
     note: dtoWithExercise.note,
     userId: authorId,
-    exerciseId: dtoWithExercise.exerciseId,
+    workoutExerciseId: dtoWithExercise.workoutExerciseId,
   };
 
   mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
@@ -162,7 +162,7 @@ it('should create a note linked to an exercise when exerciseId is provided', asy
       user: { connect: { id: authorId } },
       workout: undefined,
       workoutProgram: undefined,
-      exercise: { connect: { id: dtoWithExercise.exerciseId } },
+      workoutExercise: { connect: { id: dtoWithExercise.workoutExerciseId } },
     },
   });
 
@@ -177,7 +177,7 @@ it('should create a note with multiple relations when multiple ids are provided'
     note: 'linked to workout, program and exercise',
     workoutId: 101,
     workoutProgramId: 202,
-    exerciseId: 303,
+    workoutExerciseId: 303,
   };
 
   const mockCreated = {
@@ -187,7 +187,7 @@ it('should create a note with multiple relations when multiple ids are provided'
     userId: authorId,
     workoutId: dtoAll.workoutId,
     workoutProgramId: dtoAll.workoutProgramId,
-    exerciseId: dtoAll.exerciseId,
+    workoutExerciseId: dtoAll.workoutExerciseId,
   };
 
   mockPrisma.notes.create.mockResolvedValueOnce(mockCreated);
@@ -203,7 +203,7 @@ it('should create a note with multiple relations when multiple ids are provided'
       user: { connect: { id: authorId } },
       workout: { connect: { id: dtoAll.workoutId } },
       workoutProgram: { connect: { id: dtoAll.workoutProgramId } },
-      exercise: { connect: { id: dtoAll.exerciseId } },
+      workoutExercise: { connect: { id: dtoAll.workoutExerciseId } },
     },
   });
 

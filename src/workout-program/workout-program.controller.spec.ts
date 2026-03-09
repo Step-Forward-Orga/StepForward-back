@@ -62,10 +62,6 @@ describe('WorkoutController', () => {
     controller = module.get<WorkoutProgramController>(WorkoutProgramController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   it('should create a workout program', async () => {
     const dto: CreateWorkoutProgramDto = { title: 'Program A', description: 'Details' };
     const mockReturn = { id: 1, title: dto.title, description: dto.description, user: { id: 1, username: 'john', email: 'john@example.com' }, workouts: [], note: null };

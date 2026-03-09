@@ -10,6 +10,11 @@ import { InvalidTokenType } from '../errors/InvalidTokenType';
 
 import { AuthenticationService } from './authentication.service';
 
+jest.mock('bcrypt', () => ({
+    hash: jest.fn(),
+    compare: jest.fn(),
+  }));
+
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let jwtService: JwtService;
@@ -43,6 +48,7 @@ describe('AuthenticationService', () => {
 
     service = module.get<AuthenticationService>(AuthenticationService);
     jwtService = module.get<JwtService>(JwtService);
+    jest.clearAllMocks();
   });
 
   it('should generate access and refresh tokens', async () => {
@@ -145,8 +151,8 @@ describe('AuthenticationService', () => {
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
       };
-  
-      jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce('hashedPassword'); // Mock password hashing
+      (bcrypt.hash as unknown as jest.Mock).mockResolvedValueOnce('hashedPassword'); // Mock password hashing
+      // jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce('hashedPassword'); // Mock password hashing
       prismaService.user.create = jest.fn().mockResolvedValueOnce(mockUser); // Mock user creation
       jest.spyOn(service, 'generateTokens').mockResolvedValueOnce(mockTokens); // Mock token generation
   
@@ -217,7 +223,8 @@ describe('AuthenticationService', () => {
       };
   
       prismaService.user.findFirst = jest.fn().mockResolvedValueOnce(mockUser); // Mock user retrieval
-      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true); // Mock password comparison
+      (bcrypt.compare as unknown as jest.Mock).mockResolvedValueOnce(true); // Mock password comparison
+      // jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(true); // Mock password comparison
       jest.spyOn(service, 'generateTokens').mockResolvedValueOnce(mockTokens); // Mock token generation
   
       // Act
@@ -275,7 +282,8 @@ describe('AuthenticationService', () => {
       };
   
       prismaService.user.findFirst = jest.fn().mockResolvedValueOnce(mockUser); // Mock user retrieval
-      jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false); // Mock password mismatch
+      (bcrypt.compare as unknown as jest.Mock).mockResolvedValueOnce(false); // Mock password mismatch
+      // jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false); // Mock password mismatch
   
       const mockCredentials = {
         identification: 'test@example.com',
