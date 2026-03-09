@@ -28,10 +28,6 @@ describe('WorkoutProgramService', () => {
     prisma = module.get<PrismaService>(PrismaService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('should create a workout program', async () => {
     const dto = { title: 'Push Day', description: 'Upper body focus'};
     const userId = 1;
