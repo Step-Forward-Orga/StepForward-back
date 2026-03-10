@@ -67,7 +67,7 @@ model WorkoutProgram {
   title       String
   description String @default("")
   createdAt   DateTime @default(now())
-  noteId Int? @unique
+  noteId      Int? @unique
 
   note        Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
