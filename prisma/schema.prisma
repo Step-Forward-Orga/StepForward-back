@@ -50,6 +50,7 @@ model Workout {
   userId      Int
   title       String
   description String @default("")
+  code        String   @unique
   createdAt   DateTime @default(now())
   noteId Int? @unique
   workoutProgramId Int?
@@ -66,7 +67,7 @@ model WorkoutProgram {
   title       String
   description String @default("")
   createdAt   DateTime @default(now())
-  noteId Int? @unique
+  noteId      Int? @unique
 
   note        Notes? @relation(fields: [noteId], references: [id])
   user        User @relation(fields: [userId], references: [id])
@@ -90,7 +91,7 @@ model Set {
 // Schema for a Exercise
 model Exercise {
   id                Int      @id @default(autoincrement())
-  name              String
+  name              String   @unique
   description       String
 
   workoutExercises  WorkoutExercise[]

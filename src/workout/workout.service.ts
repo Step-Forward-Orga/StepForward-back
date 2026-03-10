@@ -15,13 +15,20 @@ export class WorkoutService {
     createWorkoutDto: CreateWorkoutDto,
     workoutProgramId: number
   ) {
-    return await this.prisma.workout.create({
+    const workout = await this.prisma.workout.create({
       data: {
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
         user: { connect: { id: userId } },
+        code: '',
         workoutProgram: workoutProgramId ? { connect: { id: workoutProgramId } } : undefined,
       },
+    });
+    const code = this.buildWorkoutCode(workout.title, workout.id);
+
+    return await this.prisma.workout.update({
+      where: { id: workout.id },
+      data: { code },
     });
   }
 
@@ -29,12 +36,19 @@ export class WorkoutService {
     userId: number,
     createWorkoutDto: CreateWorkoutDto,
   ) {
-    return await this.prisma.workout.create({
+    const workout = await this.prisma.workout.create({
       data: {
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
-        user: { connect: { id: userId } }
+        user: { connect: { id: userId } },
+        code: '',
       },
+    });
+    const code = this.buildWorkoutCode(workout.title, workout.id);
+
+    return await this.prisma.workout.update({
+      where: { id: workout.id },
+      data: { code },
     });
   }
 
@@ -64,5 +78,15 @@ export class WorkoutService {
 
   async remove(id: number) {
     return await this.prisma.workout.delete({ where: { id } });
+  }
+
+  private buildWorkoutCode(title: string, id: number) {
+    const slug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+    return `${slug || 'workout'}-${id}`
   }
 }
