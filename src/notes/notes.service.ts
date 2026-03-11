@@ -75,7 +75,8 @@ export class NotesService {
     if (!existingNote) {
       throw new NotFoundException('Note not found');
     } else if (existingNote.userId != userId) {
-      throw new UnauthorizedException("Can't modify other people notes")
+      //TODO: unit test this
+      throw new UnauthorizedException("Can't delete other people notes")
     }
     return await this.prisma.notes.delete({
       where: { id  }

@@ -388,7 +388,7 @@ describe('NotesService - update', () => {
 
     mockPrisma.notes.findFirst.mockResolvedValueOnce(existingNote);
     mockPrisma.notes.update.mockResolvedValueOnce(updatedNotes);
-    const result = await service.update(id, updateDto, updatedNotes.userId);
+    const result = await service.update(id, updateDto, userId);
     expect(prisma.notes.findFirst).toHaveBeenCalledWith({
       where: { id },
     });
@@ -400,6 +400,31 @@ describe('NotesService - update', () => {
     });
     expect(result).toEqual(updatedNotes);
   });
+
+  it('should throw an error when a user tries to update a not that is not his', async () => {
+    const id = 1;
+    const ownerId = 1;
+    const userId = 2;
+    const existingNote = {
+      id,
+      title: 'Old Title',
+      note: 'Old Note',
+      userId: ownerId,
+    };
+    const updateDto: UpdateNotesDto = {
+      title: 'Updated title',
+      note: 'Updated Note',
+    };
+    
+    mockPrisma.notes.findFirst.mockResolvedValueOnce(existingNote);
+    await expect(service.update(id, updateDto, userId)).rejects.toThrow(
+      "Can't modify other people notes",
+    );
+    expect(prisma.notes.findFirst).toHaveBeenCalledWith({
+      where: { id },
+    });
+    expect(prisma.notes.update).not.toHaveBeenCalled();
+  })
 
   it('should throw an error if note to update is not found', async () => {
     const id = 999;
@@ -490,6 +515,27 @@ describe('NotesService - remove', () => {
     });
     expect(result).toEqual(mockDeletedNotes);
   });
+
+  it('should throw an error when a user tries to delete a not that is not his', async () => {
+    const id = 1;
+    const ownerId = 1;
+    const userId = 2;
+    const existingNote = {
+      id,
+      title: 'Title',
+      note: 'Note',
+      userId: ownerId,
+    };
+    
+    mockPrisma.notes.findFirst.mockResolvedValueOnce(existingNote);
+    await expect(service.remove(id, userId)).rejects.toThrow(
+      "Can't delete other people notes",
+    );
+    expect(prisma.notes.findFirst).toHaveBeenCalledWith({
+      where: { id },
+    });
+    expect(prisma.notes.delete).not.toHaveBeenCalled();
+  })
 
   it('should throw an error if the note does not exist', async () => {
     const id = 999;
