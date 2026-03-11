@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { connect } from 'http2';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -28,19 +27,35 @@ export class NotesService {
     })
   }
 
-  async findAll() {
-    return await this.prisma.notes.findMany();
-  }
-
-  async findOne(id: number) {
-    return await this.prisma.notes.findUnique({
-      where: { id },
+  async findAll(userId: number){
+    return await this.prisma.notes.findMany({
+      where: { userId }
     });
   }
 
-  async update(id: number, UpdateNotesDto: UpdateNotesDto) {
+  async findOne(id: number, userId: number) {
+    return this.prisma.notes.findFirstOrThrow({
+      where: {
+        id,
+        userId,
+      },
+    });
+  }
+
+  async update(id: number, UpdateNotesDto: UpdateNotesDto, userId: number) {
     const { title, note } = UpdateNotesDto;
 
+    const existingNote = await this.prisma.notes.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingNote) {
+      throw new NotFoundException('Note not found');
+    } else if (existingNote.userId != userId) {
+      throw new UnauthorizedException("Can't modify other people notes")
+    }
     return await this.prisma.notes.update({
       where: { id },
       data: {
@@ -50,7 +65,20 @@ export class NotesService {
     });
   }
 
-  async remove(id: number) {
-    return await this.prisma.notes.delete({ where: { id } });
+  async remove(id: number, userId: number) {
+    const existingNote = await this.prisma.notes.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingNote) {
+      throw new NotFoundException('Note not found');
+    } else if (existingNote.userId != userId) {
+      throw new UnauthorizedException("Can't modify other people notes")
+    }
+    return await this.prisma.notes.delete({
+      where: { id  }
+    });
   }
 }
