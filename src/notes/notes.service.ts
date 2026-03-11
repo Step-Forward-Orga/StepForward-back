@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -42,9 +42,8 @@ export class NotesService {
     });
   }
 
-  async update(id: number, UpdateNotesDto: UpdateNotesDto, userId: number) {
-    const { title, note } = UpdateNotesDto;
-
+  async update(id: number, updateNotesDto: UpdateNotesDto, userId: number) {
+    const { title, note } = updateNotesDto;
     const existingNote = await this.prisma.notes.findFirst({
       where: {
         id,
@@ -54,7 +53,7 @@ export class NotesService {
     if (!existingNote) {
       throw new NotFoundException('Note not found');
     } else if (existingNote.userId != userId) {
-      throw new UnauthorizedException("Can't modify other people notes")
+      throw new ForbiddenException("Can't modify other people notes")
     }
     return await this.prisma.notes.update({
       where: { id },
@@ -75,8 +74,7 @@ export class NotesService {
     if (!existingNote) {
       throw new NotFoundException('Note not found');
     } else if (existingNote.userId != userId) {
-      //TODO: unit test this
-      throw new UnauthorizedException("Can't delete other people notes")
+      throw new ForbiddenException("Can't delete other people notes")
     }
     return await this.prisma.notes.delete({
       where: { id  }
