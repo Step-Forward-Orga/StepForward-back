@@ -48,8 +48,10 @@ export class NotesController {
   @ApiResponse({ status: 200, description: 'OK', type: [NotesEntity] })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ApiResponseBody})
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async findAll() {
-    const notes = await this.NotesService.findAll();
+  async findAll(
+    @User() user: JwtPayload,
+  ) {
+    const notes = await this.NotesService.findAll(user.sub);
     return notes.map((note) => new NotesEntity(note));
   }
 
@@ -60,8 +62,11 @@ export class NotesController {
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ApiResponseBody})
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async findOne(@Param('id') id: string) {
-    const note = await this.NotesService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+    @User() user: JwtPayload
+  ) {
+    const note = await this.NotesService.findOne(+id, user.sub);
     return new NotesEntity(note);
   }
 
@@ -73,8 +78,12 @@ export class NotesController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async update(@Param('id') id: string, @Body() UpdateNotesDto: UpdateNotesDto) {
-    const note = await this.NotesService.update(+id, UpdateNotesDto);
+  async update(
+    @Param('id') id: string,
+    @Body() UpdateNotesDto: UpdateNotesDto,
+    @User() user: JwtPayload
+  ) {
+    const note = await this.NotesService.update(+id, UpdateNotesDto, user.sub);
     return new NotesEntity(note);
   }
 
@@ -85,8 +94,11 @@ export class NotesController {
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ApiResponseBody})
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async remove(@Param('id') id: string) {
-    const note = await this.NotesService.remove(+id);
+  async remove(
+    @Param('id') id: string,
+    @User() user: JwtPayload,
+  ) {
+    const note = await this.NotesService.remove(+id, user.sub);
     return new NotesEntity(note);
   }
 }
