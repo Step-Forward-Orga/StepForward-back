@@ -143,10 +143,20 @@ describe('ExerciseService - findAll', () => {
     mockPrisma.exercise.findMany.mockResolvedValueOnce(mockExercises);
 
     // Act
-    const result = await service.findAll();
+    const result = await service.findAll({ search: 'press' });
 
     // Assert
-    expect(prisma.exercise.findMany).toHaveBeenCalled();
+    expect(prisma.exercise.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { name: { contains: 'press', mode: 'insensitive' } },
+          { description: { contains: 'press', mode: 'insensitive' } },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: { name: 'desc' },
+    });
     expect(result).toEqual(mockExercises);
   });
 
@@ -156,7 +166,7 @@ describe('ExerciseService - findAll', () => {
     mockPrisma.exercise.findMany.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findAll()).rejects.toThrow('Database error');
+    await expect(service.findAll({})).rejects.toThrow('Database error');
     expect(prisma.exercise.findMany).toHaveBeenCalled();
   });
 });

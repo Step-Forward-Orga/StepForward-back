@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { BaseQueryDto } from '../common/dto/base-query.dto';
+import { toPagination, toSearch } from '../common/query';
 
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
@@ -20,27 +22,11 @@ export class ExerciseService {
     })
   }
 
-  async findAll() {
+  async findAll(query: BaseQueryDto) {
     return await this.prisma.exercise.findMany({
-      include: { 
-        workoutExercises: {
-          include: {
-            plannedSets: true,
-            completedSets: true,
-            workout: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    username: true,
-                    email: true,
-                  }
-                }          }
-            },
-            note: true
-          }
-        }},
-    }); 
+      where: toSearch(['name', 'description'], query.search),
+      ...toPagination(query, ['name']),
+    });
   }
 
   async findOne(id: number) {

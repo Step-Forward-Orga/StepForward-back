@@ -72,7 +72,7 @@ describe('ExerciseController', () => {
   it('should return all exercises', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'findAll').mockResolvedValueOnce([mockExercise] as any);
-    const result = await controller.findAll();
+    const result = await controller.findAll({});
     expect(result).toEqual([mockExerciseEntity]);
   });
 
@@ -107,7 +107,7 @@ describe('ExerciseController', () => {
     it('should handle errors in findAll', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'findAll').mockRejectedValueOnce(new Error('findAll error'));
-      await controller.findAll();
+      await controller.findAll({});
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 

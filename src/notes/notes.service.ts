@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { UpdateNotesDto } from './dto/update-notes.dto';
 import { CreateNotesDto } from './dto/create-notes.dto';
+import { GetNotesQueryDto } from './dto/get-notes-query.dto';
+import { toPagination, toSearch } from '../common/query';
 
 @Injectable()
 export class NotesService {
@@ -20,16 +22,25 @@ export class NotesService {
         title: createNotesDto.title,
         note: createNotesDto.note,
         user: { connect: { id: authorId } },
-        workout: createNotesDto.workoutId ? { connect: { id: createNotesDto.workoutId } } : undefined,
-        workoutProgram: createNotesDto.workoutProgramId ? { connect: { id: createNotesDto.workoutProgramId } } : undefined,
-        workoutExercise: createNotesDto.workoutExerciseId ? { connect: { id: createNotesDto.workoutExerciseId } } : undefined,
+        // owner check in each connect: can't attach a note to someone else's data
+        workout: createNotesDto.workoutId ? { connect: { id: createNotesDto.workoutId, userId: authorId } } : undefined,
+        workoutProgram: createNotesDto.workoutProgramId ? { connect: { id: createNotesDto.workoutProgramId, userId: authorId } } : undefined,
+        workoutExercise: createNotesDto.workoutExerciseId ? { connect: { id: createNotesDto.workoutExerciseId, workout: { userId: authorId } } } : undefined,
       },
     })
   }
 
-  async findAll(userId: number){
+  async findAll(userId: number, query: GetNotesQueryDto){
     return await this.prisma.notes.findMany({
-      where: { userId }
+      where: {
+        userId,
+        // the FK lives on the other side of these 1-1 relations, so filter through the relation
+        ...(query.workoutId && { workout: { id: query.workoutId } }),
+        ...(query.workoutProgramId && { workoutProgram: { id: query.workoutProgramId } }),
+        ...(query.workoutExerciseId && { workoutExercise: { id: query.workoutExerciseId } }),
+        ...toSearch(['title', 'note'], query.search),
+      },
+      ...toPagination(query, ['createdAt', 'title']),
     });
   }
 

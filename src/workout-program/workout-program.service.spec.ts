@@ -10,7 +10,7 @@ describe('WorkoutProgramService', () => {
     workoutProgram: {
       create: jest.fn(),
       findMany: jest.fn(),
-      findUniqueOrThrow: jest.fn(),
+      findFirstOrThrow: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
@@ -49,28 +49,32 @@ describe('WorkoutProgramService', () => {
     const mockList = [{ id: 1, title: 'Plan A', description: 'Desc', userId: 1 }];
     mockPrisma.workoutProgram.findMany.mockResolvedValueOnce(mockList);
 
-    const result = await service.findAll();
-    expect(prisma.workoutProgram.findMany).toHaveBeenCalled();
+    const result = await service.findAll(1, { search: 'plan', page: 2, limit: 5, include: ['workouts', 'user'] });
+    expect(prisma.workoutProgram.findMany).toHaveBeenCalledWith({
+      where: {
+        userId: 1,
+        OR: [
+          { title: { contains: 'plan', mode: 'insensitive' } },
+          { description: { contains: 'plan', mode: 'insensitive' } },
+        ],
+      },
+      include: { workouts: true },
+      skip: 5,
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+    });
     expect(result).toEqual(mockList);
   });
 
   it('should return one workout program', async () => {
     const id = 1;
     const mockItem = { id, title: 'Plan A', description: 'Desc', userId: 1 };
-    mockPrisma.workoutProgram.findUniqueOrThrow.mockResolvedValueOnce(mockItem);
+    mockPrisma.workoutProgram.findFirstOrThrow.mockResolvedValueOnce(mockItem);
 
-    const result = await service.findOne(id);
-    expect(prisma.workoutProgram.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id },
-      include: {
-        workouts: {
-          include: {
-            user: true,
-          },
-        },
-        user: true,
-        note: true,
-      },
+    const result = await service.findOne(id, 1, ['note']);
+    expect(prisma.workoutProgram.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id, userId: 1 },
+      include: { note: true },
     });
     expect(result).toEqual(mockItem);
   });
@@ -81,8 +85,8 @@ describe('WorkoutProgramService', () => {
     const updated = { id, title: 'Updated Plan', description: 'Old desc', userId: 1 };
     mockPrisma.workoutProgram.update.mockResolvedValueOnce(updated);
 
-    const result = await service.update(id, dto);
-    expect(prisma.workoutProgram.update).toHaveBeenCalledWith({ where: { id }, data: dto });
+    const result = await service.update(id, 1, dto);
+    expect(prisma.workoutProgram.update).toHaveBeenCalledWith({ where: { id, userId: 1 }, data: dto });
     expect(result).toEqual(updated);
   });
 
@@ -91,8 +95,8 @@ describe('WorkoutProgramService', () => {
     const deleted = { id, title: 'To delete', description: '...', userId: 1 };
     mockPrisma.workoutProgram.delete.mockResolvedValueOnce(deleted);
 
-    const result = await service.remove(id);
-    expect(prisma.workoutProgram.delete).toHaveBeenCalledWith({ where: { id } });
+    const result = await service.remove(id, 1);
+    expect(prisma.workoutProgram.delete).toHaveBeenCalledWith({ where: { id, userId: 1 } });
     expect(result).toEqual(deleted);
   });
 });

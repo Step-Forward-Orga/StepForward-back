@@ -1,13 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 
 import { handleErrors } from '../utils/handle-errors';
 import { AuthGuard } from '../authentication/authentication.guard';
 import { User } from '../decorators/user.decorator';
 import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
+import { BaseQueryDto } from '../common/dto/base-query.dto';
 
 import { WorkoutService } from './workout.service';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
+import { GetWorkoutsQueryDto } from './dto/get-workout-query.dto';
 import { WorkoutEntity } from './entities/workout.entity';
 
 // ? user can create, delete, get, delete his workout plans
@@ -45,9 +47,9 @@ export class WorkoutController {
   }
 
   @Get()
-  async findAll() {
+  async findAll(@User() user: JwtPayload, @Query() query: GetWorkoutsQueryDto) {
     try {
-      const workouts = await this.WorkoutService.findAll();
+      const workouts = await this.WorkoutService.findAll(user.sub, query);
       return workouts.map((workout) => new WorkoutEntity(workout));
     } catch (error: unknown) {
       handleErrors(error);
@@ -55,9 +57,9 @@ export class WorkoutController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@User() user: JwtPayload, @Param('id') id: string, @Query() query: BaseQueryDto) {
     try {
-      const workout = await this.WorkoutService.findOne(+id);
+      const workout = await this.WorkoutService.findOne(+id, user.sub, query.include);
       return new WorkoutEntity(workout);
     } catch (error: unknown) {
       handleErrors(error);
@@ -65,9 +67,9 @@ export class WorkoutController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() UpdateWorkoutDto: UpdateWorkoutDto) {
+  async update(@User() user: JwtPayload, @Param('id') id: string, @Body() UpdateWorkoutDto: UpdateWorkoutDto) {
     try {
-      const workout = await this.WorkoutService.update(+id, UpdateWorkoutDto);
+      const workout = await this.WorkoutService.update(+id, user.sub, UpdateWorkoutDto);
       return new WorkoutEntity(workout);
     } catch (error: unknown) {
       handleErrors(error);
@@ -75,9 +77,9 @@ export class WorkoutController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@User() user: JwtPayload, @Param('id') id: string) {
     try {
-      const workout = await this.WorkoutService.remove(+id);
+      const workout = await this.WorkoutService.remove(+id, user.sub);
       return new WorkoutEntity(workout);
     } catch (error: unknown) {
       handleErrors(error);

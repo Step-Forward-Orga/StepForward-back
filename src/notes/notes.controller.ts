@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { ApiBody, ApiCookieAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { User } from '../decorators/user.decorator';
@@ -10,6 +10,7 @@ import { ApiResponseBody } from '../responses/ApiResponse';
 import { NotesService } from './notes.service';
 import { CreateNotesDto } from './dto/create-notes.dto';
 import { UpdateNotesDto } from './dto/update-notes.dto';
+import { GetNotesQueryDto } from './dto/get-notes-query.dto';
 import { NotesEntity } from './entities/notes.entity';
 
 
@@ -50,8 +51,9 @@ export class NotesController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async findAll(
     @User() user: JwtPayload,
+    @Query() query: GetNotesQueryDto,
   ) {
-    const notes = await this.notesService.findAll(user.sub);
+    const notes = await this.notesService.findAll(user.sub, query);
     return notes.map((note) => new NotesEntity(note));
   }
 
@@ -66,8 +68,12 @@ export class NotesController {
     @Param('id') id: string,
     @User() user: JwtPayload
   ) {
-    const note = await this.notesService.findOne(+id, user.sub);
-    return new NotesEntity(note);
+    try {
+      const note = await this.notesService.findOne(+id, user.sub);
+      return new NotesEntity(note);
+    } catch (err: unknown) {
+      handleErrors(err);
+    }
   }
 
   @Patch(':id')

@@ -1,10 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { SetsDto } from "./sets.dot";
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { SetsDto } from "./sets.dto";
 
 export class CreateWorkoutExerciseDto {
     @ApiProperty({ example: 1 })
+    @IsInt()
     exerciseId: number;
 
     @ApiProperty({ type: [SetsDto] })

@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Role } from '@prisma/client';
 
 import { AuthGuard } from '../authentication/authentication.guard';
 import { handleErrors } from '../utils/handle-errors';
+import { Roles } from '../decorators/roles.decorator';
+import { BaseQueryDto } from '../common/dto/base-query.dto';
 
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
@@ -14,6 +17,7 @@ export class ExerciseController {
   constructor(private readonly ExerciseService: ExerciseService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   async create(@Body() createExerciseDto: CreateExerciseDto) {
     try {
       const exercise = await this.ExerciseService.create(createExerciseDto);
@@ -25,14 +29,10 @@ export class ExerciseController {
   }
 
   @Get()
-  async findAll() {
+  async findAll(@Query() query: BaseQueryDto) {
     try {
-      const exercises = await this.ExerciseService.findAll();
-
-      // return exercises;
-      //TODO: fix the line below, problem with the entities declarations
-      // return exercises.map((exercise) => new ExerciseEntity(exercise));
-      return exercises
+      const exercises = await this.ExerciseService.findAll(query);
+      return exercises.map((exercise) => new ExerciseEntity(exercise));
     } catch (error: unknown) {
       handleErrors(error);
     }
@@ -49,6 +49,7 @@ export class ExerciseController {
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     try {
       const exercise =  await this.ExerciseService.update(+id, updateExerciseDto);
@@ -59,6 +60,7 @@ export class ExerciseController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
     try {
       const exercise = await this.ExerciseService.remove(+id);

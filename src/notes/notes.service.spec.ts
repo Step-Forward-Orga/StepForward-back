@@ -73,7 +73,7 @@ describe('NotesService - create', () => {
       title: dtoWithWorkout.title,
       note: dtoWithWorkout.note,
       user: { connect: { id: userId } },
-      workout: { connect: { id: dtoWithWorkout.workoutId } },
+      workout: { connect: { id: dtoWithWorkout.workoutId, userId } },
       workoutProgram: undefined,
       workoutExercise: undefined,
     },
@@ -104,7 +104,7 @@ it('should create a note linked to a workoutProgram when workoutProgramId is pro
       note: dtoWithProgram.note,
       user: { connect: { id: userId } },
       workout: undefined,
-      workoutProgram: { connect: { id: dtoWithProgram.workoutProgramId } },
+      workoutProgram: { connect: { id: dtoWithProgram.workoutProgramId, userId } },
       workoutExercise: undefined,
     },
   });
@@ -135,7 +135,7 @@ it('should create a note linked to an exercise when exerciseId is provided', asy
       user: { connect: { id: userId } },
       workout: undefined,
       workoutProgram: undefined,
-      workoutExercise: { connect: { id: dtoWithExercise.workoutExerciseId } },
+      workoutExercise: { connect: { id: dtoWithExercise.workoutExerciseId, workout: { userId } } },
     },
   });
   expect(result).toEqual(mockNote);
@@ -167,9 +167,9 @@ it('should create a note with multiple relations when multiple ids are provided'
       title: dtoAll.title,
       note: dtoAll.note,
       user: { connect: { id: userId } },
-      workout: { connect: { id: dtoAll.workoutId } },
-      workoutProgram: { connect: { id: dtoAll.workoutProgramId } },
-      workoutExercise: { connect: { id: dtoAll.workoutExerciseId } },
+      workout: { connect: { id: dtoAll.workoutId, userId } },
+      workoutProgram: { connect: { id: dtoAll.workoutProgramId, userId } },
+      workoutExercise: { connect: { id: dtoAll.workoutExerciseId, workout: { userId } } },
     },
   });
   expect(result).toEqual(mockNote);
@@ -228,16 +228,41 @@ describe('NotesService - findAll', () => {
     ];
 
     mockPrisma.notes.findMany.mockResolvedValueOnce(mockNotes);
-    const result = await service.findAll(1);
-    expect(prisma.notes.findMany).toHaveBeenCalled();
+    const result = await service.findAll(1, {});
+    expect(prisma.notes.findMany).toHaveBeenCalledWith({
+      where: { userId: 1 },
+      skip: 0,
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+    });
     expect(result).toEqual(mockNotes);
+  });
+
+  it('should filter notes through their relations and search', async () => {
+    mockPrisma.notes.findMany.mockResolvedValueOnce([]);
+    await service.findAll(1, { workoutId: 2, workoutProgramId: 3, workoutExerciseId: 4, search: 'pr' });
+    expect(prisma.notes.findMany).toHaveBeenCalledWith({
+      where: {
+        userId: 1,
+        workout: { id: 2 },
+        workoutProgram: { id: 3 },
+        workoutExercise: { id: 4 },
+        OR: [
+          { title: { contains: 'pr', mode: 'insensitive' } },
+          { note: { contains: 'pr', mode: 'insensitive' } },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+    });
   });
 
   it('should propagate an error if findMany fails', async () => {
     const mockError = new Error('Database error');
     mockPrisma.notes.findMany.mockRejectedValueOnce(mockError);
 
-    await expect(service.findAll(1)).rejects.toThrow('Database error');
+    await expect(service.findAll(1, {})).rejects.toThrow('Database error');
     expect(prisma.notes.findMany).toHaveBeenCalled();
   });
 });

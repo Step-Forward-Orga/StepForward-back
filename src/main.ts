@@ -24,6 +24,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
+      whitelist: true, // strips unknown body fields, e.g. a forged userId on update
       transformOptions: { enableImplicitConversion: false },
     }),
   );

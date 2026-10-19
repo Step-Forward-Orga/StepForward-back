@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { SetsDto } from "./sets.dot";
+import { SetsDto } from "./sets.dto";
 import { IsArray, IsBoolean, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 

@@ -82,97 +82,97 @@ describe('WorkoutExerciseController', () => {
 
   it('should create an exercise', async () => {
     jest.spyOn(service, 'create').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.create({} as any);
+    const result = await controller.create({ sub: 1 } as any, {} as any);
 
-    expect(service.create).toHaveBeenCalledWith({} as any);
+    expect(service.create).toHaveBeenCalledWith(1, {} as any);
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
   it('should return all exercises', async () => {
-    jest.spyOn(service, 'findAll').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.findAll();
+    jest.spyOn(service, 'findAll').mockResolvedValueOnce([mockWorkoutExercise] as any);
+    const result = await controller.findAll({ sub: 1 } as any, {});
 
-    expect(service.findAll).toHaveBeenCalledWith();
-    expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
+    expect(service.findAll).toHaveBeenCalledWith(1, {});
+    expect(result).toEqual([new WorkoutExerciseEntity(mockWorkoutExercise as any)]);
   });
 
   it('should return one exercise', async () => {
     jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.findOne('1');
+    const result = await controller.findOne({ sub: 1 } as any, '1', {});
 
-    expect(service.findOne).toHaveBeenCalledWith(1);
+    expect(service.findOne).toHaveBeenCalledWith(1, 1, undefined);
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
   it('should update an exercise', async () => {
     jest.spyOn(service, 'update').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.update('1', {} as any);
+    const result = await controller.update({ sub: 1 } as any, '1', {} as any);
 
-    expect(service.update).toHaveBeenCalledWith(1, {});
+    expect(service.update).toHaveBeenCalledWith(1, 1, {});
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
   it('should complete an exercise', async () => {
     jest.spyOn(service, 'complete').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.complete('1', {} as any);
+    const result = await controller.complete({ sub: 1 } as any, '1', {} as any);
 
-    expect(service.complete).toHaveBeenCalledWith(1, {});
+    expect(service.complete).toHaveBeenCalledWith(1, 1, {});
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
   it('should remove an exercise', async () => {
     jest.spyOn(service, 'remove').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.remove('1');
+    const result = await controller.remove({ sub: 1 } as any, '1');
 
-    expect(service.remove).toHaveBeenCalledWith(1);
+    expect(service.remove).toHaveBeenCalledWith(1, 1);
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
   it('should handle errors in create', async () => {
     jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('create error'));
-    await controller.create({} as any);
+    await controller.create({ sub: 1 } as any, {} as any);
 
-    expect(service.create).toHaveBeenCalledWith({} as any);
+    expect(service.create).toHaveBeenCalledWith(1, {} as any);
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
   it('should handle errors in findAll', async () => {
     jest.spyOn(service, 'findAll').mockRejectedValueOnce(new Error('create error'));
-    await controller.findAll();
+    await controller.findAll({ sub: 1 } as any, {});
 
-    expect(service.findAll).toHaveBeenCalledWith();
+    expect(service.findAll).toHaveBeenCalledWith(1, {});
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
   it('should handle errors in findOne', async () => {
     jest.spyOn(service, 'findOne').mockRejectedValueOnce(new Error('create error'));
-    await controller.findOne('1');
+    await controller.findOne({ sub: 1 } as any, '1', {});
 
-    expect(service.findOne).toHaveBeenCalledWith(1);
+    expect(service.findOne).toHaveBeenCalledWith(1, 1, undefined);
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
   it('should handle errors in update', async () => {
     jest.spyOn(service, 'update').mockRejectedValueOnce(new Error('create error'));
-    await controller.update('1', {} as any);
+    await controller.update({ sub: 1 } as any, '1', {} as any);
 
-    expect(service.update).toHaveBeenCalledWith(1, {});
+    expect(service.update).toHaveBeenCalledWith(1, 1, {});
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
   it('should handle errors in complete', async () => {
     jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('create error'));
-    await controller.complete('1', {} as any);
+    await controller.complete({ sub: 1 } as any, '1', {} as any);
 
-    expect(service.complete).toHaveBeenCalledWith(1, {});
+    expect(service.complete).toHaveBeenCalledWith(1, 1, {});
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
   it('should handle errors in remove', async () => {
     jest.spyOn(service, 'remove').mockRejectedValueOnce(new Error('create error'));
-    await controller.remove('1');
+    await controller.remove({ sub: 1 } as any, '1');
 
-    expect(service.remove).toHaveBeenCalledWith(1);
+    expect(service.remove).toHaveBeenCalledWith(1, 1);
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 });

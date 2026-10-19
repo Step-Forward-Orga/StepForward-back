@@ -2,6 +2,7 @@ import { WorkoutProgramEntity } from './entities/workout-program.entity';
 import { CreateWorkoutProgramDto } from './dto/create-workout-program.dto';
 import { UpdateWorkoutProgramDto } from './dto/update-workout-program.dto';
 import { Test, TestingModule } from '@nestjs/testing';
+import { InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector, APP_GUARD } from '@nestjs/core';
 
@@ -77,7 +78,8 @@ describe('WorkoutController', () => {
     const service = module.get<WorkoutProgramService>(WorkoutProgramService);
     (service.findAll as jest.Mock).mockResolvedValue(mockPrograms);
 
-    const result = await controller.findAll();
+    const result = await controller.findAll({ sub: 1 } as any, {});
+    expect(service.findAll).toHaveBeenCalledWith(1, {});
     expect(result).toEqual(mockPrograms.map(p => new WorkoutProgramEntity(p)));
   });
 
@@ -86,7 +88,8 @@ describe('WorkoutController', () => {
     const service = module.get<WorkoutProgramService>(WorkoutProgramService);
     (service.findOne as jest.Mock).mockResolvedValue(mockProgram);
 
-    const result = await controller.findOne('1');
+    const result = await controller.findOne({ sub: 1 } as any, '1', { include: ['note'] });
+    expect(service.findOne).toHaveBeenCalledWith(1, 1, ['note']);
     expect(result).toEqual(new WorkoutProgramEntity(mockProgram));
   });
 
@@ -115,7 +118,8 @@ describe('WorkoutController', () => {
     const service = module.get<WorkoutProgramService>(WorkoutProgramService);
     (service.update as jest.Mock).mockResolvedValue(updated);
 
-    const result = await controller.update('1', dto);
+    const result = await controller.update({ sub: 1 } as any, '1', dto);
+    expect(service.update).toHaveBeenCalledWith(1, 1, dto);
     expect(result).toEqual(new WorkoutProgramEntity(updated));
   });
 
@@ -124,7 +128,22 @@ describe('WorkoutController', () => {
     const service = module.get<WorkoutProgramService>(WorkoutProgramService);
     (service.remove as jest.Mock).mockResolvedValue(deleted);
 
-    const result = await controller.remove('1');
+    const result = await controller.remove({ sub: 1 } as any, '1');
+    expect(service.remove).toHaveBeenCalledWith(1, 1);
     expect(result).toEqual(new WorkoutProgramEntity(deleted));
+  });
+
+  it('should map service errors through handleErrors', async () => {
+    const service = module.get<WorkoutProgramService>(WorkoutProgramService);
+    const error = new Error('boom');
+    for (const method of ['create', 'findAll', 'findOne', 'update', 'remove'] as const) {
+      (service[method] as jest.Mock).mockRejectedValueOnce(error);
+    }
+
+    await expect(controller.create({ sub: 1 } as any, { title: 'A', description: '' })).rejects.toThrow(InternalServerErrorException);
+    await expect(controller.findAll({ sub: 1 } as any, {})).rejects.toThrow(InternalServerErrorException);
+    await expect(controller.findOne({ sub: 1 } as any, '1', {})).rejects.toThrow(InternalServerErrorException);
+    await expect(controller.update({ sub: 1 } as any, '1', {})).rejects.toThrow(InternalServerErrorException);
+    await expect(controller.remove({ sub: 1 } as any, '1')).rejects.toThrow(InternalServerErrorException);
   });
 });

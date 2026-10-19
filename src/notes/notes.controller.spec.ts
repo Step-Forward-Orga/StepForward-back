@@ -92,7 +92,7 @@ describe('NotesController', () => {
       const mockNotesService = module.get<NotesService>(NotesService);
       jest.spyOn(mockNotesService, 'findAll').mockResolvedValue(mockNotes as any);
 
-      const result = await controller.findAll(mockUser as any);
+      const result = await controller.findAll(mockUser as any, {});
       expect(Array.isArray(result)).toBe(true);
       expect(result[0]).toEqual(expect.objectContaining({ id: mockNotes[0].id }));
     });
@@ -131,6 +131,15 @@ describe('NotesController', () => {
     // controller wraps in NotesEntity
     expect(mockNotesService.findOne).toHaveBeenCalledWith(5, 1);
     expect(result).toEqual(expect.objectContaining({ id: mockNote.id, title: mockNote.title }));
+  });
+
+  it('should handle errors in findOne', async () => {
+    const error = new Error('not found');
+    jest.spyOn(mockNotesService, 'findOne').mockRejectedValueOnce(error);
+
+    await controller.findOne('5', { sub: 1 } as any);
+
+    expect(handleErrorsSpy).toHaveBeenCalledWith(error);
   });
 
   it('should update a note and return NotesEntity', async () => {

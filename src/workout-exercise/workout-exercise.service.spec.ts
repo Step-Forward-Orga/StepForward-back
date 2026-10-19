@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkoutExerciseService } from './workout-exercise.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { SetsDto } from './dto/sets.dot';
+import { SetsDto } from './dto/sets.dto';
 
 const setPlannedMock1: SetsDto = {
   reps: 8,
@@ -53,7 +53,7 @@ describe('WorkoutExerciseService', () => {
       workoutExercise: {
         create: jest.fn(),
         findMany: jest.fn(),
-        findUniqueOrThrow: jest.fn(),
+        findFirstOrThrow: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
       },
@@ -94,14 +94,14 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.create.mockResolvedValueOnce(created);
 
-    const result = await service.create(dto);
+    const result = await service.create(1, dto);
 
     expect(prisma.workoutExercise.create).toHaveBeenCalledWith({
       data: {
-        exerciseId: dto.exerciseId,
+        exercise: { connect: { id: dto.exerciseId } },
         restTime: dto.restTime,
         completed: dto.completed,
-        workoutId: dto.workoutId,
+        workout: { connect: { id: dto.workoutId, userId: 1 } },
         plannedSets: { 
           create: dto.plannedSets.map((set) => ({
             reps: set.reps,
@@ -142,9 +142,20 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.findMany.mockResolvedValueOnce(mockList);
 
-    const result = await service.findAll();
+    const result = await service.findAll(1, { workoutId: 1, completed: false, search: 'bench', include: ['exercise'] });
 
-    expect(prisma.workoutExercise.findMany).toHaveBeenCalled();
+    expect(prisma.workoutExercise.findMany).toHaveBeenCalledWith({
+      where: {
+        workout: { userId: 1 },
+        workoutId: 1,
+        completed: false,
+        exercise: { name: { contains: 'bench', mode: 'insensitive' } },
+      },
+      include: { exercise: true },
+      skip: 0,
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+    });
     expect(result).toEqual(mockList);
   });
 
@@ -167,10 +178,10 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.update = jest.fn().mockResolvedValue(updatedExercise);
 
-    const result = await service.complete(1, completeDto);
+    const result = await service.complete(1, 1, completeDto);
 
     expect(prisma.workoutExercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, workout: { userId: 1 } },
       data: {
         completed: completeDto.completed,
         completedSets: {
@@ -203,12 +214,12 @@ describe('WorkoutExerciseService', () => {
       workoutId: 1,
     };
 
-    mockPrisma.workoutExercise.findUniqueOrThrow.mockResolvedValueOnce(mockWorkoutExercise);
+    mockPrisma.workoutExercise.findFirstOrThrow.mockResolvedValueOnce(mockWorkoutExercise);
 
-    const result = await service.findOne(1);
+    const result = await service.findOne(1, 1);
 
-    expect(prisma.workoutExercise.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: 1 },
+    expect(prisma.workoutExercise.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 1, workout: { userId: 1 } },
     });
     expect(result).toEqual(mockWorkoutExercise);
   });
@@ -232,10 +243,10 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.update.mockResolvedValueOnce(completedWorkoutExercise);
 
-    const result = await service.complete(1, completeDto as any);
+    const result = await service.complete(1, 1, completeDto as any);
 
     expect(prisma.workoutExercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, workout: { userId: 1 } },
       data: {
         completed: completeDto.completed,
         completedSets: {
@@ -275,15 +286,16 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.update.mockResolvedValueOnce(updatedWorkoutExercise);
 
-    const result = await service.update(1, updateDto as any);
+    const result = await service.update(1, 1, updateDto as any);
 
     expect(prisma.workoutExercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, workout: { userId: 1 } },
       data: {
         restTime: updateDto.restTime,
         completed: updateDto.completed,
         plannedSets: {
-          set: updateDto.plannedSets.map((set) => ({
+          deleteMany: {},
+          create: updateDto.plannedSets.map((set) => ({
             reps: set.reps,
             weight: set.weight,
             order: set.order,
@@ -291,6 +303,7 @@ describe('WorkoutExerciseService', () => {
           })),
         },
       },
+      include: { plannedSets: true },
     });
     expect(result).toEqual(updatedWorkoutExercise);
   });
@@ -313,14 +326,15 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.update.mockResolvedValueOnce(updatedWorkoutExercise);
 
-    const result = await service.update(1, updateDto as any);
+    const result = await service.update(1, 1, updateDto as any);
 
     expect(prisma.workoutExercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, workout: { userId: 1 } },
       data: {
         restTime: updateDto.restTime,
         completed: updateDto.completed,
       },
+      include: { plannedSets: true },
     });
     expect(result).toEqual(updatedWorkoutExercise);
   });
@@ -338,10 +352,10 @@ describe('WorkoutExerciseService', () => {
 
     mockPrisma.workoutExercise.delete.mockResolvedValueOnce(deletedWorkoutExercise);
 
-    const result = await service.remove(1);
+    const result = await service.remove(1, 1);
 
     expect(prisma.workoutExercise.delete).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, workout: { userId: 1 } },
     });
     expect(result).toEqual(deletedWorkoutExercise);
   });
