@@ -70,6 +70,20 @@ describe('ExerciseController', () => {
     expect(result).toEqual(mockExerciseEntity);
   });
 
+  it('should return an exercise history', async () => {
+    const service = (await import('./exercise.service')).ExerciseService.prototype;
+    jest.spyOn(service, 'history').mockResolvedValueOnce([] as any);
+    expect(await controller.history({ sub: 2 } as any, '3', { limit: 30 })).toEqual([]);
+    expect(service.history).toHaveBeenCalledWith(3, 2, 30);
+  });
+
+  it('should handle errors in history', async () => {
+    const service = (await import('./exercise.service')).ExerciseService.prototype;
+    jest.spyOn(service, 'history').mockRejectedValueOnce(new Error('history error'));
+    await controller.history({ sub: 2 } as any, '3', {});
+    expect(handleErrorsSpy).toHaveBeenCalled();
+  });
+
   it('should pass isAdmin false for regular users', async () => {
     const service = (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'update').mockResolvedValueOnce(mockExercise as any);

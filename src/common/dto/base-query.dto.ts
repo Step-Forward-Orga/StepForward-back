@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsPositive, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
 
 export class BaseQueryDto {
     @ApiPropertyOptional()
@@ -15,11 +15,12 @@ export class BaseQueryDto {
     @Min(1)
     page?: number = 1;
 
-    @ApiPropertyOptional({ default: 10 })
+    @ApiPropertyOptional({ default: 10, maximum: 100 })
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @IsPositive()
+    @Max(100)
     limit?: number = 10;
 
     @ApiPropertyOptional({ example: 'createdAt' })

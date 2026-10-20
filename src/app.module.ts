@@ -9,10 +9,11 @@ import { ExerciseModule } from './exercise/exercise.module';
 import { WorkoutModule } from './workout/workout.module';
 import { WorkoutProgramModule } from './workout-program/workout-program.module';
 import { WorkoutExerciseModule } from './workout-exercise/workout-exercise.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
-    PrismaModule, UserModule, AuthenticationModule, NotesModule, ExerciseModule, WorkoutModule, WorkoutProgramModule, WorkoutExerciseModule
+    PrismaModule, UserModule, AuthenticationModule, NotesModule, ExerciseModule, WorkoutModule, WorkoutProgramModule, WorkoutExerciseModule, SessionModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -50,6 +50,15 @@ export class ExerciseController {
     }
   }
 
+  @Get(':id/history')
+  async history(@User() user: JwtPayload, @Param('id') id: string, @Query() query: BaseQueryDto) {
+    try {
+      return await this.ExerciseService.history(+id, user.sub, query.limit);
+    } catch (error: unknown) {
+      handleErrors(error);
+    }
+  }
+
   @Patch(':id')
   async update(@User() user: JwtPayload, @Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     try {

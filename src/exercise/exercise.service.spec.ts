@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ExerciseService } from './exercise.service';
+import { ExerciseService, summarizeSets } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 
 describe('ExerciseService - create', () => {
@@ -387,5 +387,66 @@ describe('ExerciseService - remove', () => {
     expect(prisma.exercise.delete).toHaveBeenCalledWith({
       where: { id: 999, OR: [{ userId: null }, { userId: 1 }] },
     });
+  });
+});
+describe('summarizeSets', () => {
+  it('picks the heaviest set (most reps on a tie), total volume and best Epley 1RM', () => {
+    const result = summarizeSets([
+      { reps: 8, weight: 80 },
+      { reps: 6, weight: 85 },
+      { reps: 9, weight: 85 },
+      { reps: 0, weight: 100 },
+    ]);
+
+    expect(result.topSet).toEqual({ reps: 0, weight: 100 });
+    expect(result.volume).toBe(8 * 80 + 6 * 85 + 9 * 85);
+    // failed set (0 reps) is ignored for the 1RM: best is 85 * (1 + 9 / 30) = 110.5
+    expect(result.estimatedOneRepMax).toBe(110.5);
+  });
+
+  it('prefers more reps when the weight is the same', () => {
+    expect(summarizeSets([{ reps: 6, weight: 85 }, { reps: 9, weight: 85 }]).topSet).toEqual({ reps: 9, weight: 85 });
+  });
+
+  it('handles an exercise with no sets', () => {
+    expect(summarizeSets([])).toEqual({ topSet: null, volume: 0, estimatedOneRepMax: 0 });
+  });
+});
+
+describe('ExerciseService - history', () => {
+  const prisma = {
+    exercise: { findFirstOrThrow: jest.fn() },
+    sessionExercise: { findMany: jest.fn() },
+  };
+  const service = new ExerciseService(prisma as any);
+
+  it('returns the latest sessions oldest first with their summary', async () => {
+    prisma.exercise.findFirstOrThrow.mockResolvedValueOnce({ id: 3 });
+    const sets = [{ reps: 8, weight: 80 }];
+    prisma.sessionExercise.findMany.mockResolvedValueOnce([
+      { note: null, sets, session: { id: 2, title: 'Upper 1', startedAt: new Date('2026-10-14') } },
+      { note: 'easy', sets, session: { id: 1, title: 'Upper 1', startedAt: new Date('2026-10-07') } },
+    ]);
+
+    const result = await service.history(3, 1, 5);
+
+    expect(prisma.exercise.findFirstOrThrow).toHaveBeenCalledWith({ where: { id: 3, OR: [{ userId: null }, { userId: 1 }] } });
+    expect(prisma.sessionExercise.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { exerciseId: 3, session: { userId: 1 }, sets: { some: {} } },
+        orderBy: { session: { startedAt: 'desc' } },
+        take: 5,
+      }),
+    );
+    expect(result.map((entry) => entry.sessionId)).toEqual([1, 2]);
+    expect(result[0]).toEqual(expect.objectContaining({ note: 'easy', volume: 640, topSet: sets[0] }));
+  });
+
+  it('404s on an exercise the user cannot see', async () => {
+    prisma.exercise.findFirstOrThrow.mockRejectedValueOnce(new Error('not found'));
+    prisma.sessionExercise.findMany.mockClear();
+
+    await expect(service.history(3, 1)).rejects.toThrow('not found');
+    expect(prisma.sessionExercise.findMany).not.toHaveBeenCalled();
   });
 });
