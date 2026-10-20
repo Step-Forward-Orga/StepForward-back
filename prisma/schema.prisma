@@ -100,7 +100,7 @@ model Exercise {
   workoutExercises WorkoutExercise[]
   sessionExercises SessionExercise[]
 
-  // shortcut: NULLs are distinct in Postgres, so two global exercises can share a name; only admins create those
+  // NULL userIds are distinct in Postgres: ExerciseService.create checks global names itself
   @@unique([name, userId])
 }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { BaseQueryDto } from '../common/dto/base-query.dto';
@@ -19,6 +19,10 @@ export class ExerciseService {
 
   // admins add to the global catalog, everyone else creates a private exercise
   async create(userId: number, isAdmin: boolean, createExerciseDto: CreateExerciseDto) {
+    // the unique index can't catch this one: Postgres treats NULL userIds as distinct
+    if (isAdmin && await this.prisma.exercise.findFirst({ where: { name: createExerciseDto.name, userId: null } })) {
+      throw new ConflictException('Already exists');
+    }
     return await this.prisma.exercise.create({
       data: {
         name: createExerciseDto.name,

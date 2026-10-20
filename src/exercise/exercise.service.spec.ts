@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +13,7 @@ describe('ExerciseService - create', () => {
   const mockPrisma = {
     exercise: {
       create: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
     },
   };
@@ -80,6 +82,15 @@ describe('ExerciseService - create', () => {
 
     expect(result).toEqual(createdExercise);
   })
+
+  it('should refuse a second global exercise with the same name', async () => {
+    mockPrisma.exercise.create.mockClear();
+    mockPrisma.exercise.findFirst.mockResolvedValueOnce({ id: 1, name: 'Bench Press', userId: null });
+
+    await expect(service.create(1, true, { name: 'Bench Press' })).rejects.toThrow(ConflictException);
+    expect(prisma.exercise.findFirst).toHaveBeenCalledWith({ where: { name: 'Bench Press', userId: null } });
+    expect(prisma.exercise.create).not.toHaveBeenCalled();
+  });
 
   it('should propagate an error if creation fails', async () => {
     // Arrange
