@@ -85,14 +85,9 @@ const seedExercises = async () => {
     ]
 
     for (const exercise of exercises) {
-        await prisma.exercise.upsert({
-            where: { name: exercise.name },
-            update: {},
-            create: {
-                name: exercise.name,
-                description: exercise.description,
-            },
-        })
+        // no upsert: the global catalog has userId null, which can't be used in a unique where
+        const existing = await prisma.exercise.findFirst({ where: { name: exercise.name, userId: null } })
+        if (!existing) await prisma.exercise.create({ data: exercise })
     }
 }
 
@@ -166,121 +161,122 @@ const seedWorkoutProgram = async () => {
 const seedWorkoutExercise = async () => {
     const workoutExercises = [
         //sm incline press
-        { exerciseId: 20, restTime: "PTM3M",  completed: false, workoutId: 1, 
+        { exerciseId: 20, restTime: "PT3M", workoutId: 1, 
             plannedSets: [
-                { reps: 8, weight: 80, order: 1, type: "PLANNED"},
-                { reps: 6, weight: 80, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 65, order: 3, type: "PLANNED"},
+                { reps: 8, weight: 80, order: 1},
+                { reps: 6, weight: 80, order: 2},
+                { reps: 10, weight: 65, order: 3},
             ]
         },
         //lat pull down
-        { exerciseId: 14, restTime: "PTM3M",  completed: false, workoutId: 1,
+        { exerciseId: 14, restTime: "PT3M", workoutId: 1,
             plannedSets: [
-                { reps: 8, weight: 105, order: 1, type: "PLANNED"},
-                { reps: 6, weight: 105, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 90, order: 3, type: "PLANNED"},
+                { reps: 8, weight: 105, order: 1},
+                { reps: 6, weight: 105, order: 2},
+                { reps: 10, weight: 90, order: 3},
             ]
         },
         //decline db press
-        { exerciseId: 21, restTime: "PTM3M",  completed: false, workoutId: 1,
+        { exerciseId: 21, restTime: "PT3M", workoutId: 1,
             plannedSets: [
-                { reps: 7, weight: 48, order: 1, type: "PLANNED"},
-                { reps: 5, weight: 48, order: 2, type: "PLANNED"},
-                { reps: 7, weight: 42, order: 3, type: "PLANNED"},
+                { reps: 7, weight: 48, order: 1},
+                { reps: 5, weight: 48, order: 2},
+                { reps: 7, weight: 42, order: 3},
             ]
         },
         //tbar
-        { exerciseId: 13, restTime: "PTM3M",  completed: false, workoutId: 1,
+        { exerciseId: 13, restTime: "PT3M", workoutId: 1,
             plannedSets: [
-                { reps: 7, weight: 90, order: 1, type: "PLANNED"},
-                { reps: 6, weight: 90, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 75, order: 3, type: "PLANNED"},
+                { reps: 7, weight: 90, order: 1},
+                { reps: 6, weight: 90, order: 2},
+                { reps: 10, weight: 75, order: 3},
             ]
         },
         //Machine pec fly
-        { exerciseId: 11, restTime: "PTM3M",  completed: false, workoutId: 1,
+        { exerciseId: 11, restTime: "PT3M", workoutId: 1,
             plannedSets: [
-                { reps: 8, weight: 40, order: 1, type: "PLANNED"},
-                { reps: 5, weight: 40, order: 2, type: "PLANNED"},
-                { reps: 6, weight: 30, order: 3, type: "PLANNED"},
+                { reps: 8, weight: 40, order: 1},
+                { reps: 5, weight: 40, order: 2},
+                { reps: 6, weight: 30, order: 3},
             ]
         },
         //Lat pullover
-        { exerciseId: 22, restTime: "PTM3M",  completed: false, workoutId: 1,
+        { exerciseId: 22, restTime: "PT3M", workoutId: 1,
             plannedSets: [
-                { reps: 6, weight: 32.5, order: 1, type: "PLANNED"},
-                { reps: 5, weight: 32.5, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 25, order: 3, type: "PLANNED"},
+                { reps: 6, weight: 32.5, order: 1},
+                { reps: 5, weight: 32.5, order: 2},
+                { reps: 10, weight: 25, order: 3},
             ]
         },
         // ! workout 2
         //Bulgarian Split Squat
-        { exerciseId: 52, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 52, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 8, weight: 80, order: 1, type: "PLANNED"},
-                { reps: 6, weight: 80, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 65, order: 3, type: "PLANNED"},
+                { reps: 8, weight: 80, order: 1},
+                { reps: 6, weight: 80, order: 2},
+                { reps: 10, weight: 65, order: 3},
             ]
         },
         //Sited Leg Extension
-        { exerciseId: 7, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 7, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 12, weight: 100, order: 1, type: "PLANNED"},
-                { reps: 12, weight: 100, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 85, order: 3, type: "PLANNED"},
+                { reps: 12, weight: 100, order: 1},
+                { reps: 12, weight: 100, order: 2},
+                { reps: 10, weight: 85, order: 3},
             ]
         },
         //Leg Press
-        { exerciseId: 24, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 24, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 8, weight: 220, order: 1, type: "PLANNED"},
-                { reps: 6, weight: 220, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 190, order: 3, type: "PLANNED"},
+                { reps: 8, weight: 220, order: 1},
+                { reps: 6, weight: 220, order: 2},
+                { reps: 10, weight: 190, order: 3},
             ]
         },
         //Sited Leg Curl
-        { exerciseId: 8, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 8, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 10, weight: 75, order: 1, type: "PLANNED"},
-                { reps: 8, weight: 75, order: 2, type: "PLANNED"},
-                { reps: 10, weight: 60, order: 3, type: "PLANNED"},
+                { reps: 10, weight: 75, order: 1},
+                { reps: 8, weight: 75, order: 2},
+                { reps: 10, weight: 60, order: 3},
             ]
         },
         //Horizontal Press Calf Extensions
-        { exerciseId: 25, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 25, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 15, weight: 200, order: 1, type: "PLANNED"},
-                { reps: 13, weight: 200, order: 2, type: "PLANNED"},
-                { reps: 15, weight: 180, order: 3, type: "PLANNED"},
+                { reps: 15, weight: 200, order: 1},
+                { reps: 13, weight: 200, order: 2},
+                { reps: 15, weight: 180, order: 3},
             ]
         },
         //Cable Crunch
-        { exerciseId: 40, restTime: "PTM3M",  completed: false, workoutId: 2,
+        { exerciseId: 40, restTime: "PT3M", workoutId: 2,
             plannedSets: [
-                { reps: 15, weight: 45, order: 1, type: "PLANNED"},
-                { reps: 12, weight: 45, order: 2, type: "PLANNED"},
-                { reps: 15, weight: 40, order: 3, type: "PLANNED"},
+                { reps: 15, weight: 45, order: 1},
+                { reps: 12, weight: 45, order: 2},
+                { reps: 15, weight: 40, order: 3},
             ]
         },
     ]
 
-    for (const workoutExercise of workoutExercises) {
+    for (const [index, workoutExercise] of workoutExercises.entries()) {
     await prisma.workoutExercise.create({
         data: {
             exercise: {
                 connect: { id: workoutExercise.exerciseId }
             },
             restTime: workoutExercise.restTime,
-            completed: workoutExercise.completed,
+            order: index + 1,
             workout: {
                 connect: { id: workoutExercise.workoutId }
             },
             plannedSets: {
+                // top set aims for a range, back-off sets for a fixed target
                 create: workoutExercise.plannedSets.map((set) => ({
-                    reps: set.reps,
-                    weight: set.weight,
                     order: set.order,
-                    type: set.type as "PLANNED" | "COMPLETED",
+                    repsMin: set.reps,
+                    repsMax: set.order === 1 ? set.reps + 2 : set.reps,
+                    weight: set.weight,
                 })),
             },
         },
@@ -311,6 +307,40 @@ const seedNotes = async () => {
     }
 }
 
+// One logged session of "Upper 1" so history and progression have data
+const seedSessions = async () => {
+    const workout = await prisma.workout.findUniqueOrThrow({
+        where: { id: 1 },
+        include: { workoutExercises: { include: { plannedSets: true }, orderBy: { order: 'asc' } } },
+    })
+
+    await prisma.workoutSession.create({
+        data: {
+            title: workout.title,
+            user: { connect: { id: workout.userId } },
+            workout: { connect: { id: workout.id } },
+            startedAt: new Date(Date.now() - 2 * 24 * 3600 * 1000),
+            finishedAt: new Date(Date.now() - 2 * 24 * 3600 * 1000 + 75 * 60 * 1000),
+            note: "good energy",
+            exercises: {
+                create: workout.workoutExercises.map((workoutExercise) => ({
+                    order: workoutExercise.order,
+                    exercise: { connect: { id: workoutExercise.exerciseId } },
+                    workoutExercise: { connect: { id: workoutExercise.id } },
+                    sets: {
+                        create: workoutExercise.plannedSets.map((set) => ({
+                            order: set.order,
+                            reps: set.repsMin,
+                            weight: set.weight ?? 0,
+                            note: set.order === 1 ? "top set" : undefined,
+                        })),
+                    },
+                })),
+            },
+        },
+    })
+}
+
 async function main() {
     await seedUsers();
     await seedExercises();
@@ -318,6 +348,7 @@ async function main() {
     await seedWorkoutProgram();
     await seedWorkoutExercise();
     await seedNotes();
+    await seedSessions();
 }
 
 main()

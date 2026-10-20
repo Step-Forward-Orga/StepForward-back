@@ -42,12 +42,13 @@ describe('ExerciseService - create', () => {
 
     mockPrisma.exercise.create.mockResolvedValueOnce(createdExercise);
 
-    const result = await service.create(createExerciseDto);
+    const result = await service.create(1, false, createExerciseDto);
 
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
         name: createExerciseDto.name,
         description: createExerciseDto.description,
+        userId: 1,
       },
     });
 
@@ -67,12 +68,13 @@ describe('ExerciseService - create', () => {
 
     mockPrisma.exercise.create.mockResolvedValueOnce(createdExercise);
 
-    const result = await service.create(createExerciseDto);
+    const result = await service.create(1, false, createExerciseDto);
 
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
         name: createExerciseDto.name,
         description: "",
+        userId: 1,
       },
     });
 
@@ -91,13 +93,15 @@ describe('ExerciseService - create', () => {
     mockPrisma.exercise.create.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.create(createExerciseDto)).rejects.toThrow(
+    await expect(service.create(1, true, createExerciseDto)).rejects.toThrow(
       'Database connection failed',
     );
+    // admins write to the global catalog
     expect(prisma.exercise.create).toHaveBeenCalledWith({
       data: {
         name: createExerciseDto.name,
         description: createExerciseDto.description,
+        userId: null,
       },
     });
   });
@@ -143,14 +147,19 @@ describe('ExerciseService - findAll', () => {
     mockPrisma.exercise.findMany.mockResolvedValueOnce(mockExercises);
 
     // Act
-    const result = await service.findAll({ search: 'press' });
+    const result = await service.findAll(1, { search: 'press' });
 
     // Assert
     expect(prisma.exercise.findMany).toHaveBeenCalledWith({
       where: {
-        OR: [
-          { name: { contains: 'press', mode: 'insensitive' } },
-          { description: { contains: 'press', mode: 'insensitive' } },
+        AND: [
+          { OR: [{ userId: null }, { userId: 1 }] },
+          {
+            OR: [
+              { name: { contains: 'press', mode: 'insensitive' } },
+              { description: { contains: 'press', mode: 'insensitive' } },
+            ],
+          },
         ],
       },
       skip: 0,
@@ -166,7 +175,7 @@ describe('ExerciseService - findAll', () => {
     mockPrisma.exercise.findMany.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findAll({})).rejects.toThrow('Database error');
+    await expect(service.findAll(1, {})).rejects.toThrow('Database error');
     expect(prisma.exercise.findMany).toHaveBeenCalled();
   });
 });
@@ -177,7 +186,7 @@ describe('ExerciseService - findOne', () => {
 
   const mockPrisma = {
     exercise: {
-      findUniqueOrThrow: jest.fn(),
+      findFirstOrThrow: jest.fn(),
     },
   };
 
@@ -201,14 +210,14 @@ describe('ExerciseService - findOne', () => {
       description: 'description',
     };
 
-    mockPrisma.exercise.findUniqueOrThrow.mockResolvedValueOnce(mockExercise);
+    mockPrisma.exercise.findFirstOrThrow.mockResolvedValueOnce(mockExercise);
 
     // Act
-    const result = await service.findOne(1);
+    const result = await service.findOne(1, 1);
 
     // Assert
-    expect(prisma.exercise.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: 1 },
+    expect(prisma.exercise.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 1, OR: [{ userId: null }, { userId: 1 }] },
     });
     expect(result).toEqual(mockExercise);
   });
@@ -216,12 +225,12 @@ describe('ExerciseService - findOne', () => {
   it('should throw an error if no exercise is found', async () => {
     // Arrange
     const mockError = new Error('Exercise not found');
-    mockPrisma.exercise.findUniqueOrThrow.mockRejectedValueOnce(mockError);
+    mockPrisma.exercise.findFirstOrThrow.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findOne(1)).rejects.toThrow('Exercise not found');
-    expect(prisma.exercise.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: 1 },
+    await expect(service.findOne(1, 1)).rejects.toThrow('Exercise not found');
+    expect(prisma.exercise.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 1, OR: [{ userId: null }, { userId: 1 }] },
     });
   });
 });
@@ -264,11 +273,11 @@ describe('ExerciseService - update', () => {
     mockPrisma.exercise.update.mockResolvedValueOnce(updatedExercise);
 
     // Act
-    const result = await service.update(1, updateExerciseDto);
+    const result = await service.update(1, 1, false, updateExerciseDto);
 
     // Assert
     expect(prisma.exercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, userId: 1 },
       data: updateExerciseDto,
     });
     expect(result).toEqual(updatedExercise);
@@ -285,11 +294,11 @@ describe('ExerciseService - update', () => {
     mockPrisma.exercise.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(999, updateExerciseDto)).rejects.toThrow(
+    await expect(service.update(999, 1, false, updateExerciseDto)).rejects.toThrow(
       'Exercise not found',
     );
     expect(prisma.exercise.update).toHaveBeenCalledWith({
-      where: { id: 999 },
+      where: { id: 999, userId: 1 },
       data: updateExerciseDto,
     });
   });
@@ -305,11 +314,11 @@ describe('ExerciseService - update', () => {
     mockPrisma.exercise.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(1, updateExerciseDto)).rejects.toThrow(
+    await expect(service.update(1, 1, false, updateExerciseDto)).rejects.toThrow(
       'Database error',
     );
     expect(prisma.exercise.update).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, userId: 1 },
       data: updateExerciseDto,
     });
   });
@@ -348,11 +357,11 @@ describe('ExerciseService - remove', () => {
     mockPrisma.exercise.delete.mockResolvedValueOnce(mockDeletedExercise);
 
     // Act
-    const result = await service.remove(1);
+    const result = await service.remove(1, 1, true);
 
     // Assert
     expect(prisma.exercise.delete).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { id: 1, OR: [{ userId: null }, { userId: 1 }] },
     });
     expect(result).toEqual(mockDeletedExercise);
   });
@@ -363,9 +372,9 @@ describe('ExerciseService - remove', () => {
     mockPrisma.exercise.delete.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.remove(999)).rejects.toThrow('Exercise not found');
+    await expect(service.remove(999, 1, true)).rejects.toThrow('Exercise not found');
     expect(prisma.exercise.delete).toHaveBeenCalledWith({
-      where: { id: 999 },
+      where: { id: 999, OR: [{ userId: null }, { userId: 1 }] },
     });
   });
 });

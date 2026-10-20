@@ -23,7 +23,6 @@ describe('WorkoutExerciseController', () => {
           provide: WorkoutExerciseService,
           useValue: {
             create: jest.fn(),
-            complete: jest.fn(),
             findAll: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn(),
@@ -72,10 +71,9 @@ describe('WorkoutExerciseController', () => {
       name: "bench",
       description: "this is desc"
     },
-    completed: false,
+    order: 1,
     restTime: 'PT1M',
     plannedSets: [],
-    completedSets: [],
   };
 
   const mockWorkoutExerciseEntity = expect.any(Object);
@@ -112,13 +110,6 @@ describe('WorkoutExerciseController', () => {
     expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
   });
 
-  it('should complete an exercise', async () => {
-    jest.spyOn(service, 'complete').mockResolvedValueOnce(mockWorkoutExercise as any);
-    const result = await controller.complete({ sub: 1 } as any, '1', {} as any);
-
-    expect(service.complete).toHaveBeenCalledWith(1, 1, {});
-    expect(result).toEqual(new WorkoutExerciseEntity(mockWorkoutExercise as any));
-  });
 
   it('should remove an exercise', async () => {
     jest.spyOn(service, 'remove').mockResolvedValueOnce(mockWorkoutExercise as any);
@@ -160,13 +151,6 @@ describe('WorkoutExerciseController', () => {
     expect(handleErrorsSpy).toHaveBeenCalled();
   });
 
-  it('should handle errors in complete', async () => {
-    jest.spyOn(service, 'complete').mockRejectedValueOnce(new Error('create error'));
-    await controller.complete({ sub: 1 } as any, '1', {} as any);
-
-    expect(service.complete).toHaveBeenCalledWith(1, 1, {});
-    expect(handleErrorsSpy).toHaveBeenCalled();
-  });
 
   it('should handle errors in remove', async () => {
     jest.spyOn(service, 'remove').mockRejectedValueOnce(new Error('create error'));

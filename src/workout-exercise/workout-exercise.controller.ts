@@ -5,7 +5,6 @@ import { UpdateWorkoutExerciseDto } from './dto/update-workout-exercise.dto';
 import { GetWorkoutExercisesQueryDto } from './dto/get-workout-exercise-query.dto';
 import { handleErrors } from '../utils/handle-errors';
 import { WorkoutExerciseEntity } from './entities/workout-exercise.entity';
-import { CompleteWorkoutExerciseDto } from './dto/complete-workout-exercise.dto';
 import { AuthGuard } from '../authentication/authentication.guard';
 import { User } from '../decorators/user.decorator';
 import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
@@ -66,20 +65,6 @@ export class WorkoutExerciseController {
     try {
       const exercise = await this.workoutExerciseService.update(+id, user.sub, updateWorkoutExerciseDto);
 
-      return new WorkoutExerciseEntity(exercise);
-    } catch (error: unknown) {
-      handleErrors(error);
-    }
-  }
-
-  @Patch(':id/complete')
-  async complete(
-    @User() user: JwtPayload,
-    @Param('id') id: string,
-    @Body() completeExerciseDto: CompleteWorkoutExerciseDto
-  ) {
-    try {
-      const exercise = await this.workoutExerciseService.complete(+id, user.sub, completeExerciseDto);
       return new WorkoutExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
