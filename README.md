@@ -29,8 +29,9 @@ $ docker compose up -d --build
 # unit tests
 $ npm run test
 
-# e2e tests
-#$ npm run test:e2e comming soon
+# e2e tests: needs the database from `docker compose up`,
+# runs against a separate <DB_NAME>_e2e database that is reset on every run
+$ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
