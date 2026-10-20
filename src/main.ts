@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import { ValidationPipe } from '@nestjs/common';
+import { configureApp } from './app.setup';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
@@ -20,13 +19,7 @@ async function bootstrap() {
       ? (process.env.FRONT_URL as string)
       : ( process.env.NODE_ENV === 'staging' ? (process.env.FRONT_URL as string) : `*`))
   })
-  app.use(cookieParser());
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: { enableImplicitConversion: false },
-    }),
-  );
+  configureApp(app);
   const config = new DocumentBuilder()
     .setTitle('StepForward')
     .setDescription('API documentation for StepForward API.')

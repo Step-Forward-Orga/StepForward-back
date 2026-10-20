@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { ExerciseEntity } from "../../exercise/entities/exercise.entity";
-import { SetEntity } from "./set.entity";
+import { PlannedSetEntity } from "./planned-set.entity";
 import { NotesEntity } from "../../notes/entities/notes.entity";
 import { WorkoutEntity } from "../../workout/entities/workout.entity";
 
@@ -19,22 +19,15 @@ export class WorkoutExerciseEntity {
     @ApiProperty({ example: new Date() })
     createdAt: Date;
 
-    @ApiProperty({ type: () => [SetEntity] })
-    @Type(() => SetEntity)
-    plannedSets?: SetEntity[];
+    @ApiProperty({ example: 1 })
+    order: number;
 
-    @ApiProperty({ example: "PTM3M" })
+    @ApiProperty({ type: () => [PlannedSetEntity] })
+    @Type(() => PlannedSetEntity)
+    plannedSets?: PlannedSetEntity[];
+
+    @ApiProperty({ example: "PT3M" })
     restTime: string;
-
-    @ApiProperty({ type: () => [SetEntity] })
-    @Type(() => SetEntity)
-    completedSets?: SetEntity[];
-
-    @ApiProperty({ example: false })
-    completed?: boolean;
-
-    @ApiProperty({ example: new Date() })
-    completedAt?: Date;
 
     @ApiProperty({ example: 1 })
     noteId?: number;
@@ -66,11 +59,7 @@ export class WorkoutExerciseEntity {
         }
 
         if (partial.plannedSets) {
-            this.plannedSets = partial.plannedSets.map((set) => new SetEntity(set));
-        }
-
-        if (partial.completedSets) {
-            this.completedSets = partial.completedSets.map((set) => new SetEntity(set));
+            this.plannedSets = partial.plannedSets.map((set) => new PlannedSetEntity(set));
         }
     }
 }

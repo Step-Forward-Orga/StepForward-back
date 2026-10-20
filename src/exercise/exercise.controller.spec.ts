@@ -65,63 +65,85 @@ describe('ExerciseController', () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'create').mockResolvedValueOnce(mockExercise as any);
     // controller is already in scope
-    const result = await controller.create({} as any);
+    const result = await controller.create({ sub: 1, roles: ['ADMIN'] } as any, {} as any);
+    expect(service.create).toHaveBeenCalledWith(1, true, {});
     expect(result).toEqual(mockExerciseEntity);
+  });
+
+  it('should return an exercise history', async () => {
+    const service = (await import('./exercise.service')).ExerciseService.prototype;
+    jest.spyOn(service, 'history').mockResolvedValueOnce([] as any);
+    expect(await controller.history({ sub: 2 } as any, '3', { limit: 30 })).toEqual([]);
+    expect(service.history).toHaveBeenCalledWith(3, 2, 30);
+  });
+
+  it('should handle errors in history', async () => {
+    const service = (await import('./exercise.service')).ExerciseService.prototype;
+    jest.spyOn(service, 'history').mockRejectedValueOnce(new Error('history error'));
+    await controller.history({ sub: 2 } as any, '3', {});
+    expect(handleErrorsSpy).toHaveBeenCalled();
+  });
+
+  it('should pass isAdmin false for regular users', async () => {
+    const service = (await import('./exercise.service')).ExerciseService.prototype;
+    jest.spyOn(service, 'update').mockResolvedValueOnce(mockExercise as any);
+    await controller.update({ sub: 2, roles: ['USER'] } as any, '1', {} as any);
+    expect(service.update).toHaveBeenCalledWith(1, 2, false, {});
   });
 
   it('should return all exercises', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'findAll').mockResolvedValueOnce([mockExercise] as any);
-    const result = await controller.findAll();
+    const result = await controller.findAll({ sub: 1, roles: ['ADMIN'] } as any, {});
     expect(result).toEqual([mockExerciseEntity]);
   });
 
   it('should return one exercise', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockExercise as any);
-    const result = await controller.findOne('1');
+    const result = await controller.findOne({ sub: 1, roles: ['ADMIN'] } as any, '1');
     expect(result).toEqual(mockExerciseEntity);
   });
 
   it('should update an exercise', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'update').mockResolvedValueOnce(mockExercise as any);
-    const result = await controller.update('1', {} as any);
+    const result = await controller.update({ sub: 1, roles: ['ADMIN'] } as any, '1', {} as any);
     expect(result).toEqual(mockExerciseEntity);
   });
 
   it('should remove an exercise', async () => {
     const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
     jest.spyOn(service, 'remove').mockResolvedValueOnce(mockExercise as any);
-    const result = await controller.remove('1');
+    const result = await controller.remove({ sub: 1, roles: ['ADMIN'] } as any, '1');
     expect(result).toEqual(mockExerciseEntity);
   });
 
   it('should handle errors in create', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'create').mockRejectedValueOnce(new Error('create error'));
-      await controller.create({} as any);
+      await controller.create({ sub: 1, roles: ['ADMIN'] } as any, {} as any);
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
     it('should handle errors in findAll', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'findAll').mockRejectedValueOnce(new Error('findAll error'));
-      await controller.findAll();
+      await controller.findAll({ sub: 1, roles: ['ADMIN'] } as any, {});
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
     it('should handle errors in findOne', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'findOne').mockRejectedValueOnce(new Error('findOne error'));
-      await controller.findOne('1');
+      await controller.findOne({ sub: 1, roles: ['ADMIN'] } as any, '1');
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
     it('should handle errors in update', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'update').mockRejectedValueOnce(new Error('update error'));
-      await controller.update('1', {} as any);
+      await controller.update({ sub: 1, roles: ['ADMIN'] } as any, '1', {} as any);
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 
@@ -135,7 +157,7 @@ describe('ExerciseController', () => {
     it('should handle errors in remove', async () => {
       const service = (global as any).module?.get?.(ExerciseService) || (await import('./exercise.service')).ExerciseService.prototype;
       jest.spyOn(service, 'remove').mockRejectedValueOnce(new Error('remove error'));
-      await controller.remove('1');
+      await controller.remove({ sub: 1, roles: ['ADMIN'] } as any, '1');
       expect(handleErrorsSpy).toHaveBeenCalled();
     });
 });

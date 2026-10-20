@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateWorkoutExerciseDto } from './dto/create-workout-exercise.dto';
 import { UpdateWorkoutExerciseDto } from './dto/update-workout-exercise.dto';
-import  { CompleteWorkoutExerciseDto } from './dto/complete-workout-exercise.dto';
+import { GetWorkoutExercisesQueryDto } from './dto/get-workout-exercise-query.dto';
+import { PlannedSetDto } from './dto/planned-set.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { toInclude, toPagination } from '../common/query';
+
+const INCLUDABLE = ['plannedSets', 'exercise', 'note', 'workout'];
 
 @Injectable()
 export class WorkoutExerciseService {
@@ -10,96 +14,66 @@ export class WorkoutExerciseService {
     private readonly prisma: PrismaService
   ) {}
 
-  async create(createWorkoutExerciseDto: CreateWorkoutExerciseDto) {
+  async create(userId: number, createWorkoutExerciseDto: CreateWorkoutExerciseDto) {
     return await this.prisma.workoutExercise.create({
       data: {
-        exerciseId: createWorkoutExerciseDto.exerciseId,
+        // global catalog or one of the user's own exercises
+        exercise: { connect: { id: createWorkoutExerciseDto.exerciseId, OR: [{ userId: null }, { userId }] } },
         restTime: createWorkoutExerciseDto.restTime,
-        completed: createWorkoutExerciseDto.completed,
-        workoutId: createWorkoutExerciseDto.workoutId,
-        plannedSets: {
-          create: createWorkoutExerciseDto.plannedSets.map((set) => ({
-            reps: set.reps,
-            weight: set.weight,
-            order: set.order,
-            type: set.type
-          })),
-        },
+        order: createWorkoutExerciseDto.order,
+        // userId in the connect: can't add exercises to someone else's workout
+        workout: { connect: { id: createWorkoutExerciseDto.workoutId, userId } },
+        plannedSets: { create: this.toPlannedSets(createWorkoutExerciseDto.plannedSets) },
       },
       include: { plannedSets: true }
     });
   }
 
-  async findAll() {
+  async findAll(userId: number, query: GetWorkoutExercisesQueryDto) {
     return await this.prisma.workoutExercise.findMany({
-      include: {
-        plannedSets: true,
-        completedSets: true,
-        workout: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                email: true,
-              }
-            }          }
-        },
-        note: true
-      }
-    });
-  }
-
-  async findOne(id: number) {
-    return await this.prisma.workoutExercise.findUniqueOrThrow({
-      where: {id}
-    });
-  }
-
-  async complete(id: number, CompleteWorkoutExerciseDto: CompleteWorkoutExerciseDto) {
-    return await this.prisma.workoutExercise.update({
-      where: { id },
-      data: { 
-        completed: CompleteWorkoutExerciseDto.completed,
-        completedSets: {
-          create: CompleteWorkoutExerciseDto.completedSets.map((set) => ({
-            reps: set.reps,
-            weight: set.weight,
-            order: set.order,
-            type: set.type
-          })),
-        },
-        completedAt: new Date(),
+      where: {
+        workout: { userId },
+        workoutId: query.workoutId,
+        ...(query.search && { exercise: { name: { contains: query.search, mode: 'insensitive' } } }),
       },
-      include: {
-        completedSets: true,
-        plannedSets: true
-      }
+      include: toInclude(query.include, INCLUDABLE),
+      ...toPagination(query, ['order', 'createdAt']),
     });
   }
 
-  async update(id: number, updateWorkoutExerciseDto: UpdateWorkoutExerciseDto) {
-    const { workoutId, plannedSets, ...updateData } = updateWorkoutExerciseDto;
-    const prismaData: any = { ...updateData };
+  async findOne(id: number, userId: number, include?: string[]) {
+    return await this.prisma.workoutExercise.findFirstOrThrow({
+      where: { id, workout: { userId } },
+      include: toInclude(include, INCLUDABLE),
+    });
+  }
 
-    if (plannedSets) {
-      prismaData.plannedSets = {
-        set: plannedSets.map((set) => ({
-          reps: set.reps,
-          weight: set.weight,
-          order: set.order,
-          type: set.type,
-        })),
-      };
-    }
+  async update(id: number, userId: number, updateWorkoutExerciseDto: UpdateWorkoutExerciseDto) {
+    // workoutId ignored: moving an exercise to another workout isn't supported
+    const { workoutId, exerciseId, plannedSets, ...updateData } = updateWorkoutExerciseDto;
 
     return await this.prisma.workoutExercise.update({
-      where: { id },
-      data: prismaData,
+      where: { id, workout: { userId } },
+      data: {
+        ...updateData,
+        ...(exerciseId && { exercise: { connect: { id: exerciseId, OR: [{ userId: null }, { userId }] } } }),
+        // replace the planned sets: `set` only takes ids, so delete and recreate
+        ...(plannedSets && {
+          plannedSets: { deleteMany: {}, create: this.toPlannedSets(plannedSets) },
+        }),
+      },
+      include: { plannedSets: true },
     });
   }
 
-  async remove(id: number) {
-    return await this.prisma.workoutExercise.delete({ where: { id } });
+  async remove(id: number, userId: number) {
+    return await this.prisma.workoutExercise.delete({ where: { id, workout: { userId } } });
+  }
+
+  private toPlannedSets(sets: PlannedSetDto[]) {
+    return sets.map(({ order, repsMin, repsMax, weight }) => {
+      if (repsMax < repsMin) throw new BadRequestException(`Set ${order}: repsMax must be >= repsMin`);
+      return { order, repsMin, repsMax, weight };
+    });
   }
 }

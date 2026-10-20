@@ -21,8 +21,9 @@ describe('NotesController', () => {
         {
           provide: PrismaService,
           useValue: {
-            trainingNote: {
+            note: {
               findUnique: jest.fn(),
+              findFirstOrThrow:jest.fn(),
               create: jest.fn(),
               update: jest.fn(),
               delete: jest.fn(),
@@ -86,11 +87,12 @@ describe('NotesController', () => {
         { id: 1, title: 'Note 1', note: 'Content 1', userId: 1, createdAt: new Date() },
         { id: 2, title: 'Note 2', note: 'Content 2', userId: 1, createdAt: new Date() },
       ];
+      const mockUser = { sub: 1 };
 
       const mockNotesService = module.get<NotesService>(NotesService);
       jest.spyOn(mockNotesService, 'findAll').mockResolvedValue(mockNotes as any);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll(mockUser as any, {});
       expect(Array.isArray(result)).toBe(true);
       expect(result[0]).toEqual(expect.objectContaining({ id: mockNotes[0].id }));
     });
@@ -120,14 +122,24 @@ describe('NotesController', () => {
       workoutProgramId: null,
       exerciseId: null,
     };
+    const mockUser = { sub: 1 };
 
     jest.spyOn(mockNotesService, 'findOne').mockResolvedValueOnce(mockNote as any);
 
-    const result = await controller.findOne('5');
+    const result = await controller.findOne('5', mockUser as any);
 
     // controller wraps in NotesEntity
-    expect(mockNotesService.findOne).toHaveBeenCalledWith(5);
+    expect(mockNotesService.findOne).toHaveBeenCalledWith(5, 1);
     expect(result).toEqual(expect.objectContaining({ id: mockNote.id, title: mockNote.title }));
+  });
+
+  it('should handle errors in findOne', async () => {
+    const error = new Error('not found');
+    jest.spyOn(mockNotesService, 'findOne').mockRejectedValueOnce(error);
+
+    await controller.findOne('5', { sub: 1 } as any);
+
+    expect(handleErrorsSpy).toHaveBeenCalledWith(error);
   });
 
   it('should update a note and return NotesEntity', async () => {
@@ -143,12 +155,13 @@ describe('NotesController', () => {
       workoutProgramId: null,
       exerciseId: null,
     };
+    const mockUser = { sub: 1 };
 
     jest.spyOn(mockNotesService, 'update').mockResolvedValueOnce(mockUpdated as any);
 
-    const result = await controller.update(id.toString(), updateDto as any);
+    const result = await controller.update(id.toString(), updateDto as any, mockUser as any);
 
-    expect(mockNotesService.update).toHaveBeenCalledWith(id, updateDto);
+    expect(mockNotesService.update).toHaveBeenCalledWith(id, updateDto, 1);
     expect(result).toEqual(expect.objectContaining({ id: mockUpdated.id, title: mockUpdated.title }));
   });
 
@@ -164,12 +177,13 @@ describe('NotesController', () => {
       workoutProgramId: null,
       exerciseId: null,
     };
+    const mockUser = { sub: 1 };
 
     jest.spyOn(mockNotesService, 'remove').mockResolvedValueOnce(mockDeleted as any);
 
-    const result = await controller.remove(id.toString());
+    const result = await controller.remove(id.toString(), mockUser as any);
 
-    expect(mockNotesService.remove).toHaveBeenCalledWith(id);
+    expect(mockNotesService.remove).toHaveBeenCalledWith(id, 1);
     expect(result).toEqual(expect.objectContaining({ id: mockDeleted.id }));
   });
 

@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import { JwtType } from '../enums/JwtType.enum';
 
 export interface JwtPayload {
@@ -7,4 +8,5 @@ export interface JwtPayload {
   iat: number;
   type: JwtType;
   refreshJti?: string;
+  roles?: Role[]; // set by AuthGuard from the database, not from the token
 }

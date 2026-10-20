@@ -1,12 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Role } from '@prisma/client';
 
 import { AuthGuard } from '../authentication/authentication.guard';
 import { handleErrors } from '../utils/handle-errors';
+import { User } from '../decorators/user.decorator';
+import { JwtPayload } from '../authentication/contracts/JwtPayload.interface';
+import { BaseQueryDto } from '../common/dto/base-query.dto';
 
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import { ExerciseEntity } from './entities/exercise.entity';
+
+const isAdmin = (user: JwtPayload) => !!user.roles?.includes(Role.ADMIN);
 
 @Controller('Exercise')
 @UseGuards(AuthGuard)
@@ -14,9 +20,9 @@ export class ExerciseController {
   constructor(private readonly ExerciseService: ExerciseService) {}
 
   @Post()
-  async create(@Body() createExerciseDto: CreateExerciseDto) {
+  async create(@User() user: JwtPayload, @Body() createExerciseDto: CreateExerciseDto) {
     try {
-      const exercise = await this.ExerciseService.create(createExerciseDto);
+      const exercise = await this.ExerciseService.create(user.sub, isAdmin(user), createExerciseDto);
 
       return new ExerciseEntity(exercise);
     } catch (error: unknown) {
@@ -25,33 +31,38 @@ export class ExerciseController {
   }
 
   @Get()
-  async findAll() {
+  async findAll(@User() user: JwtPayload, @Query() query: BaseQueryDto) {
     try {
-      const exercises = await this.ExerciseService.findAll();
-
-      // return exercises;
-      //TODO: fix the line below, problem with the entities declarations
-      // return exercises.map((exercise) => new ExerciseEntity(exercise));
-      return exercises
+      const exercises = await this.ExerciseService.findAll(user.sub, query);
+      return exercises.map((exercise) => new ExerciseEntity(exercise));
     } catch (error: unknown) {
       handleErrors(error);
     }
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@User() user: JwtPayload, @Param('id') id: string) {
     try {
-      const exercise =  await this.ExerciseService.findOne(+id);
+      const exercise =  await this.ExerciseService.findOne(+id, user.sub);
       return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
     }
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
+  @Get(':id/history')
+  async history(@User() user: JwtPayload, @Param('id') id: string, @Query() query: BaseQueryDto) {
     try {
-      const exercise =  await this.ExerciseService.update(+id, updateExerciseDto);
+      return await this.ExerciseService.history(+id, user.sub, query.limit);
+    } catch (error: unknown) {
+      handleErrors(error);
+    }
+  }
+
+  @Patch(':id')
+  async update(@User() user: JwtPayload, @Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
+    try {
+      const exercise =  await this.ExerciseService.update(+id, user.sub, isAdmin(user), updateExerciseDto);
       return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);
@@ -59,9 +70,9 @@ export class ExerciseController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@User() user: JwtPayload, @Param('id') id: string) {
     try {
-      const exercise = await this.ExerciseService.remove(+id);
+      const exercise = await this.ExerciseService.remove(+id, user.sub, isAdmin(user));
       return new ExerciseEntity(exercise);
     } catch (error: unknown) {
       handleErrors(error);

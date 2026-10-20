@@ -142,7 +142,7 @@ describe('WorkoutController', () => {
       const result = [{ id: 1, name: 'Leg Day' }];
       mockWorkoutService.findAll.mockResolvedValue(result);
 
-      expect(await controller.findAll()).toEqual(result.map((w) => new WorkoutEntity(w)));
+      expect(await controller.findAll({ sub: 1 } as any, {})).toEqual(result.map((w) => new WorkoutEntity(w)));
     });
 
     it('should call workout.controller.findAll and fail', async () => {
@@ -151,7 +151,7 @@ describe('WorkoutController', () => {
       const handleErrorsSpy = jest.spyOn(require('../utils/handle-errors'), 'handleErrors');
 
       try {
-        await controller.findAll();
+        await controller.findAll({ sub: 1 } as any, {});
       } catch (e) {
         // expected error, do nothing
       }
@@ -164,8 +164,8 @@ describe('WorkoutController', () => {
       const result = { id: 1, name: 'Back Day' };
       mockWorkoutService.findOne.mockResolvedValue(result);
 
-      expect(await controller.findOne('1')).toEqual(new WorkoutEntity(result));
-      expect(mockWorkoutService.findOne).toHaveBeenCalledWith(1);
+      expect(await controller.findOne({ sub: 1 } as any, '1', { include: ['note'] })).toEqual(new WorkoutEntity(result));
+      expect(mockWorkoutService.findOne).toHaveBeenCalledWith(1, 1, ['note']);
     });
 
     it('should call workout.controller.findOne and fail', async () => {
@@ -174,7 +174,7 @@ describe('WorkoutController', () => {
       const handleErrorsSpy = jest.spyOn(require('../utils/handle-errors'), 'handleErrors');
 
       try {
-        await controller.findOne('1');
+        await controller.findOne({ sub: 1 } as any, '1', { include: ['note'] });
       } catch (e) {
         // expected error, do nothing
       }
@@ -188,8 +188,8 @@ describe('WorkoutController', () => {
       const result = { id: 1, title: 'Updated Name', description: 'Updated first upper of the week' };
       mockWorkoutService.update.mockResolvedValue(result);
 
-      expect(await controller.update('1', dto)).toEqual(new WorkoutEntity(result));
-      expect(mockWorkoutService.update).toHaveBeenCalledWith(1, dto);
+      expect(await controller.update({ sub: 1 } as any, '1', dto)).toEqual(new WorkoutEntity(result));
+      expect(mockWorkoutService.update).toHaveBeenCalledWith(1, 1, dto);
     });
 
     it('should call workout.controller.update and fail', async () => {
@@ -199,7 +199,7 @@ describe('WorkoutController', () => {
       const handleErrorsSpy = jest.spyOn(require('../utils/handle-errors'), 'handleErrors');
 
       try {
-        await controller.update('1', dto);
+        await controller.update({ sub: 1 } as any, '1', dto);
       } catch (e) {
         // expected error, do nothing
       }
@@ -212,8 +212,8 @@ describe('WorkoutController', () => {
       const result = { id: 1, deleted: true };
       mockWorkoutService.remove.mockResolvedValue(result);
 
-      expect(await controller.remove('1')).toEqual(new WorkoutEntity(result));
-      expect(mockWorkoutService.remove).toHaveBeenCalledWith(1);
+      expect(await controller.remove({ sub: 1 } as any, '1')).toEqual(new WorkoutEntity(result));
+      expect(mockWorkoutService.remove).toHaveBeenCalledWith(1, 1);
     });
 
     it('should call workout.controller.remove and fail', async () => {
@@ -222,7 +222,7 @@ describe('WorkoutController', () => {
       const handleErrorsSpy = jest.spyOn(require('../utils/handle-errors'), 'handleErrors');
       
       try {
-        await controller.remove('1');
+        await controller.remove({ sub: 1 } as any, '1');
       } catch (e) {
         // expected error, do nothing
       }

@@ -14,19 +14,18 @@ import { InvalidTokenType } from '../errors/InvalidTokenType';
 export function handlePrismaErrors(error: unknown, message? : string) {
     if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return;
 
+    // never send error.message: it contains server paths and query source
     switch (error.code) {
         case 'P2002':
-            throw new ConflictException(message ?? error.message);
+            throw new ConflictException(message ?? 'Already exists');
 
         case 'P2003':
-            throw new NotFoundException(message ?? error.message);
-
         case 'P2025':
-            throw new NotFoundException(message ?? error.message);
+            throw new NotFoundException(message ?? 'Not found');
 
         default:
             console.error(error);
-            throw new InternalServerErrorException(message ?? error.message);
+            throw new InternalServerErrorException(message);
     }
 }
 

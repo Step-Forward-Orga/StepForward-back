@@ -107,7 +107,7 @@ describe('WorkoutService - create', () => {
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
         code: '',
-        workoutProgram: { connect: { id: 1 } },
+        workoutProgram: { connect: { id: 1, userId } },
       },
     });
 
@@ -173,7 +173,7 @@ describe('WorkoutService - create', () => {
         title: createWorkoutDto.title,
         description: createWorkoutDto.description,
         code: '',
-        workoutProgram: { connect: { id: 1 } },
+        workoutProgram: { connect: { id: 1, userId } },
       },
     });
 
@@ -299,11 +299,14 @@ describe('WorkoutService - findAll', () => {
     mockPrisma.workout.findMany.mockResolvedValueOnce(mockWorkouts);
 
     // Act
-    const result = await service.findAll();
+    const result = await service.findAll(1, {});
 
     // Assert
     expect(prisma.workout.findMany).toHaveBeenCalledWith({
-      include: { workoutExercises: true },
+      where: { userId: 1 },
+      skip: 0,
+      take: 10,
+      orderBy: { createdAt: 'desc' },
     });
 
     expect(result).toEqual(mockWorkouts);
@@ -316,10 +319,13 @@ describe('WorkoutService - findAll', () => {
     mockPrisma.workout.findMany.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findAll()).rejects.toThrow('Database error');
+    await expect(service.findAll(1, {})).rejects.toThrow('Database error');
 
     expect(prisma.workout.findMany).toHaveBeenCalledWith({
-      include: { workoutExercises: true },
+      where: { userId: 1 },
+      skip: 0,
+      take: 10,
+      orderBy: { createdAt: 'desc' },
     });
   });
 });
@@ -331,7 +337,7 @@ describe('WorkoutService - findOne', () => {
   // Mock PrismaService
   const mockPrisma = {
     workout: {
-      findUniqueOrThrow: jest.fn(),
+      findFirstOrThrow: jest.fn(),
     },
   };
 
@@ -360,15 +366,14 @@ describe('WorkoutService - findOne', () => {
       ],
     };
 
-    mockPrisma.workout.findUniqueOrThrow.mockResolvedValueOnce(mockWorkout);
+    mockPrisma.workout.findFirstOrThrow.mockResolvedValueOnce(mockWorkout);
 
     // Act
-    const result = await service.findOne(id);
+    const result = await service.findOne(id, 1);
 
     // Assert
-    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id },
-      include: { workoutExercises: true },
+    expect(prisma.workout.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id, userId: 1 },
     });
     expect(result).toEqual(mockWorkout);
   });
@@ -378,30 +383,28 @@ describe('WorkoutService - findOne', () => {
     const id = 999;
     const mockError = new Error('Workout plan not found');
 
-    mockPrisma.workout.findUniqueOrThrow.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.findFirstOrThrow.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findOne(id)).rejects.toThrow('Workout plan not found');
+    await expect(service.findOne(id, 1)).rejects.toThrow('Workout plan not found');
 
-    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id },
-      include: { workoutExercises: true },
+    expect(prisma.workout.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id, userId: 1 },
     });
   });
 
-  it('should propagate a generic error if findUniqueOrThrow fails', async () => {
+  it('should propagate a generic error if findFirstOrThrow fails', async () => {
     // Arrange
     const id = 1;
     const mockError = new Error('Database error');
 
-    mockPrisma.workout.findUniqueOrThrow.mockRejectedValueOnce(mockError);
+    mockPrisma.workout.findFirstOrThrow.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.findOne(id)).rejects.toThrow('Database error');
+    await expect(service.findOne(id, 1)).rejects.toThrow('Database error');
 
-    expect(prisma.workout.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id },
-      include: { workoutExercises: true },
+    expect(prisma.workout.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id, userId: 1 },
     });
   });
 });
@@ -447,11 +450,11 @@ describe('WorkoutService - update', () => {
     mockPrisma.workout.update.mockResolvedValueOnce(updatedWorkout);
 
     // Act
-    const result = await service.update(id, updateWorkoutDto);
+    const result = await service.update(id, 1, updateWorkoutDto);
 
     // Assert
     expect(prisma.workout.update).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
       data: updateWorkoutDto,
     });
 
@@ -470,12 +473,12 @@ describe('WorkoutService - update', () => {
     mockPrisma.workout.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(id, updateWorkoutDto)).rejects.toThrow(
+    await expect(service.update(id, 1, updateWorkoutDto)).rejects.toThrow(
       'Workout plan not found',
     );
 
     expect(prisma.workout.update).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
       data: updateWorkoutDto,
     });
   });
@@ -492,12 +495,12 @@ describe('WorkoutService - update', () => {
     mockPrisma.workout.update.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.update(id, updateWorkoutDto)).rejects.toThrow(
+    await expect(service.update(id, 1, updateWorkoutDto)).rejects.toThrow(
       'Database error',
     );
 
     expect(prisma.workout.update).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
       data: updateWorkoutDto,
     });
   });
@@ -539,11 +542,11 @@ describe('WorkoutService - remove', () => {
     mockPrisma.workout.delete.mockResolvedValueOnce(mockDeletedWorkout);
 
     // Act
-    const result = await service.remove(id);
+    const result = await service.remove(id, 1);
 
     // Assert
     expect(prisma.workout.delete).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
     });
     expect(result).toEqual(mockDeletedWorkout);
   });
@@ -556,10 +559,10 @@ describe('WorkoutService - remove', () => {
     mockPrisma.workout.delete.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.remove(id)).rejects.toThrow('Workout plan not found');
+    await expect(service.remove(id, 1)).rejects.toThrow('Workout plan not found');
 
     expect(prisma.workout.delete).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
     });
   });
 
@@ -571,10 +574,10 @@ describe('WorkoutService - remove', () => {
     mockPrisma.workout.delete.mockRejectedValueOnce(mockError);
 
     // Act & Assert
-    await expect(service.remove(id)).rejects.toThrow('Database error');
+    await expect(service.remove(id, 1)).rejects.toThrow('Database error');
 
     expect(prisma.workout.delete).toHaveBeenCalledWith({
-      where: { id },
+      where: { id, userId: 1 },
     });
   });
 });

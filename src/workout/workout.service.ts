@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { toInclude, toPagination, toSearch } from '../common/query';
 
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
+import { GetWorkoutsQueryDto } from './dto/get-workout-query.dto';
+
+const INCLUDABLE = ['workoutExercises', 'note', 'workoutProgram'];
 
 @Injectable()
 export class WorkoutService {
@@ -21,7 +25,8 @@ export class WorkoutService {
         description: createWorkoutDto.description,
         user: { connect: { id: userId } },
         code: '',
-        workoutProgram: workoutProgramId ? { connect: { id: workoutProgramId } } : undefined,
+        // userId in the connect: can't link a workout to someone else's program
+        workoutProgram: workoutProgramId ? { connect: { id: workoutProgramId, userId } } : undefined,
       },
     });
     const code = this.buildWorkoutCode(workout.title, workout.id);
@@ -52,32 +57,34 @@ export class WorkoutService {
     });
   }
 
-  async findAll() {
+  async findAll(userId: number, query: GetWorkoutsQueryDto) {
     return await this.prisma.workout.findMany({
-      include: {
-        workoutExercises: true,
+      where: {
+        userId,
+        workoutProgramId: query.workoutProgramId,
+        ...toSearch(['title', 'description'], query.search),
       },
+      include: toInclude(query.include, INCLUDABLE),
+      ...toPagination(query, ['createdAt', 'title']),
     });
   }
 
-  async findOne(id: number) {
-    return await this.prisma.workout.findUniqueOrThrow({
-      where: { id },
-      include: {
-        workoutExercises: true,
-      },
+  async findOne(id: number, userId: number, include?: string[]) {
+    return await this.prisma.workout.findFirstOrThrow({
+      where: { id, userId },
+      include: toInclude(include, INCLUDABLE),
     })
   }
 
-  async update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
+  async update(id: number, userId: number, updateWorkoutDto: UpdateWorkoutDto) {
     return await this.prisma.workout.update({
-      where: { id },
+      where: { id, userId },
       data: updateWorkoutDto,
     });
   }
 
-  async remove(id: number) {
-    return await this.prisma.workout.delete({ where: { id } });
+  async remove(id: number, userId: number) {
+    return await this.prisma.workout.delete({ where: { id, userId } });
   }
 
   private buildWorkoutCode(title: string, id: number) {

@@ -12,6 +12,9 @@ export class ExerciseEntity {
     @ApiProperty({ example: "squat movement great for leg growth and gaining strength" })
     description: string; // desc
 
+    @ApiProperty({ example: null, nullable: true, description: 'null for the global catalog' })
+    userId: number | null;
+
     @ApiProperty({ type: () => [WorkoutExerciseEntity] })
     @Type(() => WorkoutExerciseEntity)
     workoutExercises?: WorkoutExerciseEntity[];
